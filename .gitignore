@@ -6,6 +6,11 @@
 **/*.pnp.js
 **/*.yarn/install-state.gz
 
+Interface/node_modules
+Interface/.next
+Interface/.env
+Interface/.gitignore
+
 # testing
 **/coverage
 
