@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { getFilesByUserIdProjectId } from "@/db/files";
 import { UserAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { ChatPanel } from "@/components/active-project-detail/ChatPanel";
+import ChatInterface from "@/components/active-project-detail/ChatPanel";
 
 interface FileItem {
   file_uuid: string;
@@ -98,7 +98,7 @@ export default function Component({ params }: ComponentProps) {
           />
         </main>
       </div>
-      <ChatPanel
+      <ChatInterface
         selectedFileIds={selectedFileIds}
         files={files}
         project_uuid={params?.id || ""}

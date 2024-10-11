@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,10 +7,9 @@ import BarChart from "@/components/visualization/BarChart";
 import { saveVisualization, Visualization } from "@/db/visualizer";
 import Component from "../visualization/PieChart";
 import { UserAuth } from "@/app/context/AuthContext";
-import LineGraph from "../visualization/LineGraph";
 import LineGraphTest from "../visualization/LineGraphtest";
 import D3ScatterPlot from "../visualization/ScatterPlot";
-import Suggestion from "./Suggestion";
+import Image from "next/image";
 
 interface ChatMessage {
   id: string;
@@ -29,7 +28,36 @@ interface ChatPanelProps {
   project_uuid: string;
 }
 
-export function ChatPanel({
+type SuggestionType = {
+  id: number;
+  name: string;
+  icon: string;
+};
+
+const suggestions: SuggestionType[] = [
+  {
+    id: 1,
+    name: "What is data-fusion?",
+    icon: "/img/icon _leaf_.svg",
+  },
+  {
+    id: 2,
+    name: "How can I schedule my work?",
+    icon: "/img/icon _dumbell_.svg",
+  },
+  {
+    id: 3,
+    name: "Can you explain more about my project?",
+    icon: "/img/icon _atom_.svg",
+  },
+  {
+    id: 4,
+    name: "What is the owner of Ferrari?",
+    icon: "/img/ferrari-logo.svg",
+  },
+];
+
+export default function ChatPanel({
   selectedFileIds,
   files,
   project_uuid,
@@ -37,15 +65,20 @@ export function ChatPanel({
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true);
 
   const { user }: any = UserAuth();
 
-  const sendMessage = async () => {
-    if (currentMessage.trim() && selectedFileIds.length > 0) {
+  useEffect(() => {
+    setShowSuggestions(chatMessages.length === 0);
+  }, [chatMessages]);
+
+  const sendMessage = async (message: string) => {
+    if (message.trim() && selectedFileIds.length > 0) {
       const newUserMessage: ChatMessage = {
         id: Date.now().toString(),
         sender: "user",
-        content: currentMessage,
+        content: message,
       };
       setChatMessages((prev) => [...prev, newUserMessage]);
       setCurrentMessage("");
@@ -63,7 +96,7 @@ export function ChatPanel({
             body: JSON.stringify({
               project_uuid: project_uuid,
               file_uuids: selectedFileIds,
-              question: currentMessage,
+              question: message,
             }),
           }
         );
@@ -87,7 +120,7 @@ export function ChatPanel({
           formatted_data_for_visualization:
             data.formatted_data_for_visualization,
           summary: data.visualization_summary,
-          user_query: currentMessage,
+          user_query: message,
         };
         setChatMessages((prev) => [...prev, aiResponse]);
       } catch (error) {
@@ -104,24 +137,45 @@ export function ChatPanel({
     }
   };
 
-  const handleSaveBarVisualization = async (message: ChatMessage) => {
+  const handleSaveVisualization = async (message: ChatMessage) => {
     if (
       message.visualization &&
       message.formatted_data_for_visualization &&
       selectedFileIds.length > 0
     ) {
+      let data;
+      switch (message.visualization) {
+        case "horizontal_bar":
+        case "bar":
+          data = message.formatted_data_for_visualization.labels.map(
+            (label: any, index: any) => ({
+              label: label,
+              value:
+                message.formatted_data_for_visualization.values[0].data[index],
+            })
+          );
+          break;
+        case "pie":
+          data = message.formatted_data_for_visualization.map((item: any) => ({
+            label: item.labels,
+            value: item.values,
+          }));
+          break;
+        case "line":
+        case "scatter":
+          data = message.formatted_data_for_visualization;
+          break;
+        default:
+          console.error("Unknown visualization type");
+          return;
+      }
+
       const visualizationData: Omit<Visualization, "_id"> = {
-        userId: user.uid, // Replace with actual user ID
-        fileId: selectedFileIds[0], // Using the first selected file ID
+        userId: user.uid,
+        fileId: selectedFileIds[0],
         fileName: message.user_query || "Data Visualization",
         visualizationType: message.visualization,
-        data: message.formatted_data_for_visualization.labels.map(
-          (label: any, index: any) => ({
-            label: label,
-            value:
-              message.formatted_data_for_visualization.values[0].data[index],
-          })
-        ),
+        data: data,
         description: message.content,
         layout: {
           i: `viz-${Date.now()}`,
@@ -134,128 +188,55 @@ export function ChatPanel({
       };
 
       const result = await saveVisualization(visualizationData);
-      console.log(result);
-      console.log("yoyo");
       if (result) {
         console.log("Visualization saved successfully");
-        // You can add a notification or update UI here to indicate successful save
       } else {
         console.error("Failed to save visualization");
-        // You can add error handling or user notification here
       }
     }
   };
-  const handleSavePieVisualization = async (message: ChatMessage) => {
-    if (
-      message.visualization &&
-      message.formatted_data_for_visualization &&
-      selectedFileIds.length > 0
-    ) {
-      const visualizationData: Omit<Visualization, "_id"> = {
-        userId: user.uid, // Replace with actual user ID
-        fileId: selectedFileIds[0], // Using the first selected file ID
-        fileName: message.user_query || "Data Visualization",
-        visualizationType: message.visualization,
-        data: message.formatted_data_for_visualization.map((item: any) => ({
-          label: item.labels,
-          value: item.values,
-        })),
-        description: message.content,
-        layout: {
-          i: `viz-${Date.now()}`,
-          x: 0,
-          y: 0,
-          w: 6,
-          h: 4,
-        },
-        summary: message.summary,
-      };
 
-      const result = await saveVisualization(visualizationData);
-      console.log(result);
-      console.log("yoyo");
-      if (result) {
-        console.log("Visualization saved successfully");
-        // You can add a notification or update UI here to indicate successful save
-      } else {
-        console.error("Failed to save visualization");
-        // You can add error handling or user notification here
-      }
-    }
-  };
-  const handleSaveScatterVisualization = async (message: ChatMessage) => {
-    if (
-      message.visualization &&
-      message.formatted_data_for_visualization &&
-      selectedFileIds.length > 0
-    ) {
-      const visualizationData: Omit<Visualization, "_id"> = {
-        userId: user.uid, // Replace with actual user ID
-        fileId: selectedFileIds[0], // Using the first selected file ID
-        fileName: message.user_query || "Data Visualization",
-        visualizationType: message.visualization,
-        data: message.formatted_data_for_visualization,
-        description: message.content,
-        layout: {
-          i: `viz-${Date.now()}`,
-          x: 0,
-          y: 0,
-          w: 6,
-          h: 4,
-        },
-        summary: message.summary,
-      };
-
-      const result = await saveVisualization(visualizationData);
-      console.log(result);
-      console.log("yoyo");
-      if (result) {
-        console.log("Visualization saved successfully");
-        // You can add a notification or update UI here to indicate successful save
-      } else {
-        console.error("Failed to save visualization");
-        // You can add error handling or user notification here
-      }
-    }
-  };
-  const handleSaveLineVisualization = async (message: ChatMessage) => {
-    if (
-      message.visualization &&
-      message.formatted_data_for_visualization &&
-      selectedFileIds.length > 0
-    ) {
-      const visualizationData: Omit<Visualization, "_id"> = {
-        userId: user.uid, // Replace with actual user ID
-        fileId: selectedFileIds[0], // Using the first selected file ID
-        fileName: message.user_query || "Data Visualization",
-        visualizationType: message.visualization,
-        data: message.formatted_data_for_visualization,
-        description: message.content,
-        layout: {
-          i: `viz-${Date.now()}`,
-          x: 0,
-          y: 0,
-          w: 6,
-          h: 4,
-        },
-        summary: message.summary,
-      };
-
-      const result = await saveVisualization(visualizationData);
-      console.log(result);
-      console.log("yoyo");
-      if (result) {
-        console.log("Visualization saved successfully");
-        // You can add a notification or update UI here to indicate successful save
-      } else {
-        console.error("Failed to save visualization");
-        // You can add error handling or user notification here
-      }
+  const renderVisualization = (message: ChatMessage) => {
+    switch (message.visualization) {
+      case "horizontal_bar":
+      case "bar":
+        return (
+          <BarChart
+            data={message.formatted_data_for_visualization.labels.map(
+              (label: any, index: any) => ({
+                label: label,
+                value:
+                  message.formatted_data_for_visualization.values[0].data[
+                    index
+                  ],
+              })
+            )}
+          />
+        );
+      case "pie":
+        return (
+          <Component
+            data={message.formatted_data_for_visualization.map((item: any) => ({
+              label: item.labels,
+              value: item.values,
+            }))}
+          />
+        );
+      case "line":
+        return (
+          <LineGraphTest data={message.formatted_data_for_visualization} />
+        );
+      case "scatter":
+        return (
+          <D3ScatterPlot data={message.formatted_data_for_visualization} />
+        );
+      default:
+        return null;
     }
   };
 
   return (
-    <div className="w-[40%] flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+    <div className="w-full md:w-[40%] flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white min-h-screen">
       <div className="p-4 flex justify-between items-center bg-transparent">
         <h2 className="text-3xl font-bold" style={{ color: "#0ff" }}>
           AI Chat
@@ -278,81 +259,21 @@ export function ChatPanel({
               style={{
                 border: "1px solid currentColor",
                 boxShadow: "0 0 10px currentColor",
-                wordWrap: "break-word", // Ensure message content wraps to the next line
-                whiteSpace: "pre-wrap", // Preserve whitespace and wrap text
-                maxWidth: "60%", // Ensure the message does not exceed the parent width
+                wordWrap: "break-word",
+                whiteSpace: "pre-wrap",
+                maxWidth: "80%",
               }}
             >
               {message.content}
             </div>
-            {(message.visualization == "horizontal_bar" ||
-              message.visualization == "bar") && (
+            {message.visualization && (
               <div className="mt-2">
-                <BarChart
-                  data={message.formatted_data_for_visualization.labels.map(
-                    (label: any, index: any) => ({
-                      label: label,
-                      value:
-                        message.formatted_data_for_visualization.values[0].data[
-                          index
-                        ],
-                    })
-                  )}
-                />
+                {renderVisualization(message)}
                 <Button
-                  onClick={() => handleSaveBarVisualization(message)}
+                  onClick={() => handleSaveVisualization(message)}
                   className="mt-2 bg-green-600 hover:bg-green-700"
                 >
-                  <Save className="ml-2 h-4 w-4" />
-                  Save to Visualizer
-                </Button>
-              </div>
-            )}
-
-            {message.visualization == "pie" && (
-              <div className=" mt-2">
-                <Component
-                  data={message.formatted_data_for_visualization.map(
-                    (item: any) => ({
-                      label: item.labels,
-                      value: item.values,
-                    })
-                  )}
-                />
-                <Button
-                  onClick={() => handleSavePieVisualization(message)}
-                  className="mt-2 bg-green-600 hover:bg-green-700"
-                >
-                  <Save className="ml-2 h-4 w-4" />
-                  Save to Visualizer
-                </Button>
-              </div>
-            )}
-
-            {message.visualization == "line" && (
-              <div>
-                <LineGraphTest
-                  data={message.formatted_data_for_visualization}
-                />
-                <Button
-                  onClick={() => handleSaveLineVisualization(message)}
-                  className="mt-2 bg-green-600 hover:bg-green-700"
-                >
-                  <Save className="ml-2 h-4 w-4" />
-                  Save to Visualizer
-                </Button>
-              </div>
-            )}
-            {message.visualization == "scatter" && (
-              <div>
-                <D3ScatterPlot
-                  data={message.formatted_data_for_visualization}
-                />
-                <Button
-                  onClick={() => handleSaveScatterVisualization(message)}
-                  className="mt-2 bg-green-600 hover:bg-green-700"
-                >
-                  <Save className="ml-2 h-4 w-4" />
+                  <Save className="mr-2 h-4 w-4" />
                   Save to Visualizer
                 </Button>
               </div>
@@ -361,12 +282,36 @@ export function ChatPanel({
         ))}
       </ScrollArea>
 
-      <Suggestion />
+      {showSuggestions && (
+        <div className="flex flex-wrap mx-auto items-center text-gray-100 font-bold px-4 justify-center gap-6 mb-4">
+          {suggestions.map((item) => (
+            <div
+              className="flex h-[35px] cursor-pointer items-center justify-center gap-[5px] rounded-lg text-white border border-gray-600 bg-gray-800 px-6 py-10 shadow-sm transition-colors hover:bg-gray-100 hover:text-black"
+              onClick={() => sendMessage(item.name)}
+              key={item.id}
+            >
+              <Image
+                src={item.icon}
+                alt={item.name}
+                width={18}
+                height={16}
+                className="w-[18px]"
+              />
+              <div className="flex">
+                <div className="text-sm font-light leading-[normal]">
+                  {item.name}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="p-4 bg-transparent">
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            sendMessage();
+            sendMessage(currentMessage);
           }}
           className="flex space-x-2"
         >
