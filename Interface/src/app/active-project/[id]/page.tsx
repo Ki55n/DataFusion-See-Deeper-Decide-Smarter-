@@ -54,12 +54,30 @@ export default function Component({ params }: ComponentProps) {
     fetch(`${process.env.NEXT_PUBLIC_SQLITE_URL}/download_cleaned_data/${id}`, {
       method: "GET",
     }).then((response) => {
+      // Get the Content-Disposition header
+      const contentDisposition = response.headers.get("Content-Disposition");
+
+      // Default filename fallback based on the id
+      let filename = `${id}.zip`;
+
+      // Extract the filename from the Content-Disposition header, if it exists
+      if (contentDisposition && contentDisposition.includes("filename=")) {
+        filename = contentDisposition.split("filename=")[1].trim();
+
+        // Remove surrounding quotes from the filename if they exist
+        if (filename.startsWith('"') && filename.endsWith('"')) {
+          filename = filename.substring(1, filename.length - 1);
+        }
+      }
+
+      // Process the blob and trigger the download with the correct filename
       response.blob().then((blob) => {
-        let url = window.URL.createObjectURL(blob);
-        let a = document.createElement("a");
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
         a.href = url;
-        a.download = "cleaned_data.csv";
+        a.download = filename; // Use the extracted filename
         a.click();
+        window.URL.revokeObjectURL(url); // Clean up the URL object
       });
     });
   };
@@ -71,12 +89,30 @@ export default function Component({ params }: ComponentProps) {
         method: "GET",
       }
     ).then((response) => {
+      // Get the Content-Disposition header
+      const contentDisposition = response.headers.get("Content-Disposition");
+
+      // Default filename fallback based on the id
+      let filename = `${id}_analysis.zip`;
+
+      // Extract the filename from the Content-Disposition header, if it exists
+      if (contentDisposition && contentDisposition.includes("filename=")) {
+        filename = contentDisposition.split("filename=")[1].trim();
+
+        // Remove surrounding quotes from the filename if they exist
+        if (filename.startsWith('"') && filename.endsWith('"')) {
+          filename = filename.substring(1, filename.length - 1);
+        }
+      }
+
+      // Process the blob and trigger the download with the correct filename
       response.blob().then((blob) => {
-        let url = window.URL.createObjectURL(blob);
-        let a = document.createElement("a");
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
         a.href = url;
-        a.download = "analyzed_data.pdf ";
+        a.download = filename; // Use the extracted filename
         a.click();
+        window.URL.revokeObjectURL(url); // Clean up the URL object
       });
     });
   };
