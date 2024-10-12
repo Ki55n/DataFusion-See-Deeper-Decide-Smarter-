@@ -160,7 +160,9 @@ export default function Dashboard() {
 
         const setVoiceAndSpeak = () => {
           const voices = window.speechSynthesis.getVoices();
-          const ziraVoice = voices.find((voice) => voice.name.includes("Zira"));
+          const ziraVoice = voices.find((voice) =>
+            voice.name.includes("English Female")
+          );
           if (ziraVoice) {
             utterance.voice = ziraVoice;
           } else if (voices.length > 0) {
