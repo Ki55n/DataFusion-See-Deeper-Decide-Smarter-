@@ -283,27 +283,32 @@ export default function ChatPanel({
       </ScrollArea>
 
       {showSuggestions && (
-        <div className="flex flex-wrap mx-auto items-center text-gray-100 font-bold px-4 justify-center gap-6 mb-4">
-          {suggestions.map((item) => (
-            <div
-              className="flex h-[35px] cursor-pointer items-center justify-center gap-[5px] rounded-lg text-white border border-gray-600 bg-gray-800 px-6 py-10 shadow-sm transition-colors hover:bg-gray-100 hover:text-black"
-              onClick={() => sendMessage(item.name)}
-              key={item.id}
-            >
-              <Image
-                src={item.icon}
-                alt={item.name}
-                width={18}
-                height={16}
-                className="w-[18px]"
-              />
-              <div className="flex">
-                <div className="text-sm font-light leading-[normal]">
-                  {item.name}
+        <div>
+          <div className="flex justify-center items-center p-2 mb-24 font-bold">
+            <span className=" text-6xl">Chat With Data</span>
+          </div>
+          <div className="flex flex-wrap mx-auto items-center text-gray-100 font-bold px-4 justify-center gap-6 mb-4">
+            {suggestions.map((item) => (
+              <div
+                className="flex h-[35px] cursor-pointer items-center justify-center gap-[5px] rounded-lg text-white border border-gray-600 bg-gray-800 px-6 py-10 shadow-sm transition-colors hover:bg-gray-100 hover:text-black"
+                onClick={() => sendMessage(item.name)}
+                key={item.id}
+              >
+                <Image
+                  src={item.icon}
+                  alt={item.name}
+                  width={18}
+                  height={16}
+                  className="w-[18px]"
+                />
+                <div className="flex">
+                  <div className="text-sm font-light leading-[normal]">
+                    {item.name}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
