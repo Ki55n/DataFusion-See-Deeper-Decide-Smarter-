@@ -62,17 +62,32 @@ csv_agent_graph = WorkflowManager(
 # define summarizer llm agent
 summarizer_llm = LLMManager(api_key=API_KEY)
 
-def table_exists(conn, table_name):
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        SELECT name FROM sqlite_master 
-        WHERE type='table' AND name=?;
-    """,
-        (table_name,),
-    )
-    return cursor.fetchone() is None
+# def table_exists(conn, table_name):
+#     cursor = conn.cursor()
+#     cursor.execute(
+#         """
+#         SELECT name FROM sqlite_master 
+#         WHERE type='table' AND name=?;
+#     """,
+#         (table_name,),
+#     )
+#     return cursor.fetchone() is None
 
+def table_exists(conn, table_name_prefix):
+    cursor = conn.cursor()
+    cursor.execute("SELECT name, sql FROM sqlite_master WHERE type='table';")
+    tables = cursor.fetchall()
+
+    has_cleaned_table = False
+    for table in tables:
+        table_name, create_statement = table
+        if table_name_prefix in table_name:
+            has_cleaned_table = True
+
+    if has_cleaned_table is False:
+        raise HTTPException(status_code=404, detail=f"Cleaned Table does not exist in the database")
+    
+    return True
 
 @app.post("/call-model")
 async def call_model(request: QueryRequest):
@@ -92,14 +107,14 @@ async def call_model(request: QueryRequest):
             # Connect to SQLite and save the cleaned data
             db_file_path = os.path.join(uploads_dir, f"{id}.sqlite")
             print("db path: ", db_file_path)
-            table_name = CLEANED_TABLE_NAME
+            # table_name = CLEANED_TABLE_NAME
             conn = sqlite3.connect(db_file_path)
 
-            if table_exists(conn=conn, table_name=table_name):
+            if table_exists(conn=conn, table_name_prefix=CLEANED_TABLE_NAME) is False:
                 conn.close()
                 raise HTTPException(
                     status_code=404,
-                    detail=f"Table '{table_name}' does not exist in the database",
+                    detail=f"Table '{CLEANED_TABLE_NAME}' does not exist in the database",
                 )
             else:
                 conn.close()

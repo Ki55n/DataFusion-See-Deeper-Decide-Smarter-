@@ -58,7 +58,7 @@ def convert_dataframe_to_sqlite(df, sqlite_file_path: str):
     except Exception as e:
         raise RuntimeError(f"Error converting DataFrame(s) to SQLite: {str(e)}")
 
-def table_exists(conn, table_name):
+def table_exists(conn, table_name_prefix):
     cursor = conn.cursor()
     cursor.execute("SELECT name, sql FROM sqlite_master WHERE type='table';")
     tables = cursor.fetchall()
@@ -66,7 +66,7 @@ def table_exists(conn, table_name):
     has_cleaned_table = False
     for table in tables:
         table_name, create_statement = table
-        if table_name in table_name:
+        if table_name_prefix in table_name:
             has_cleaned_table = True
 
     if has_cleaned_table is False:
@@ -396,7 +396,7 @@ async def get_schema(uuid: str):
     try:
         # Connect to the SQLite database
         conn = sqlite3.connect(db_path)
-        table_exists(conn=conn, table_name=CLEANED_TABLE_NAME)
+        table_exists(conn=conn, table_name_prefix=CLEANED_TABLE_NAME)
         cursor = conn.cursor()
 
         # Get the table schema from sqlite_master

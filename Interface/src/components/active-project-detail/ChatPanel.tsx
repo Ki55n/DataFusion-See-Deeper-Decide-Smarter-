@@ -38,22 +38,22 @@ type SuggestionType = {
 const suggestions: SuggestionType[] = [
   {
     id: 1,
-    name: "What is data-fusion?",
+    name: "Summarize the data",
     icon: "/img/icon _leaf_.svg",
   },
   {
     id: 2,
-    name: "How can I schedule my work?",
+    name: "What is the total number of rows in the data?",
     icon: "/img/icon _dumbell_.svg",
   },
   {
     id: 3,
-    name: "Can you explain more about my project?",
+    name: "What are the distinct values in the [column name] column of the data?",
     icon: "/img/icon _atom_.svg",
   },
   {
     id: 4,
-    name: "What is the owner of Ferrari?",
+    name: "Plot [column 1 name] vs [column 2 name]",
     icon: "/img/ferrari-logo.svg",
   },
 ];
