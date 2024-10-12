@@ -248,7 +248,7 @@ async def download_tables_as_csv(file_uuid: str):
             return StreamingResponse(
                 zip_buffer,
                 media_type="application/zip",
-                headers={"Content-Disposition": f"attachment; filename={file_uuid}_tables.zip"}
+                headers={"Content-Disposition": f"attachment; filename={file_uuid}_tables_cleaned.zip"}
             )
 
         # If only a single table was returned, send it as CSV directly
@@ -263,7 +263,7 @@ async def download_tables_as_csv(file_uuid: str):
             return StreamingResponse(
                 csv_buffer,
                 media_type="text/csv",
-                headers={"Content-Disposition": f"attachment; filename={file_uuid}_{table_name}.csv"}
+                headers={"Content-Disposition": f"attachment; filename={file_uuid}_{table_name}_cleaned.csv"}
             )
 
     except Exception as e:
