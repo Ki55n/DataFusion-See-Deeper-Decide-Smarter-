@@ -14,6 +14,8 @@ Interface/.gitignore
 # testing
 **/coverage
 
+venv
+
 **/*.env
 
 

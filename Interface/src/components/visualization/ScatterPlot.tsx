@@ -184,13 +184,6 @@ export default function D3ScatterPlot({ data }: ScatterPlotProps) {
         <div ref={containerRef} className="w-full">
           <svg ref={svgRef} className="w-full h-auto"></svg>
         </div>
-        <Button
-          onClick={handleDownload}
-          className="flex items-center space-x-2"
-        >
-          <Download className="w-4 h-4" />
-          <span>Download Plot</span>
-        </Button>
       </CardContent>
     </Card>
   );

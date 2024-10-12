@@ -178,13 +178,6 @@ export default function LineGraph({ data, width = "100%" }: LineGraphProps) {
         <div ref={containerRef} className="w-full" style={{ width }}>
           <svg ref={svgRef} className="w-full h-auto"></svg>
         </div>
-        <Button
-          onClick={handleDownload}
-          className="flex items-center space-x-2"
-        >
-          <Download className="w-4 h-4" />
-          <span>Download Graph</span>
-        </Button>
       </CardContent>
     </Card>
   );

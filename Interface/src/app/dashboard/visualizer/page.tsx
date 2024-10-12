@@ -7,7 +7,7 @@ import {
   updateVisualizationLayout,
   Visualization,
 } from "@/db/visualizer";
-import { Volume2, Square } from "lucide-react";
+import { Volume2, Square, Download } from "lucide-react";
 import { UserAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Responsive, WidthProvider } from "react-grid-layout";
@@ -77,11 +77,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchVisualizations = async () => {
-      console.log("yoyo");
       if (userId) {
         const fetchedVisualizations = await getVisualizations(userId);
         setVisualizations(fetchedVisualizations);
-        console.log(fetchedVisualizations);
 
         const newLayouts: Layout[] = fetchedVisualizations.map((viz) => ({
           i: viz._id,
@@ -100,10 +98,8 @@ export default function Dashboard() {
   const renderVisualization = (visualization: Visualization) => {
     switch (visualization.visualizationType) {
       case "horizontal_bar":
-        return <BarChart data={visualization.data} />;
       case "bar":
         return <BarChart data={visualization.data} />;
-
       case "pie":
         return <PieChart data={visualization.data} />;
       case "line":
@@ -183,8 +179,63 @@ export default function Dashboard() {
     }
   };
 
+  const handleDownload = (visualization: Visualization) => {
+    // Create a new SVG element
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    svg.setAttribute("width", "800");
+    svg.setAttribute("height", "600");
+
+    // Create a white background
+    const background = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "rect"
+    );
+    background.setAttribute("width", "100%");
+    background.setAttribute("height", "100%");
+    background.setAttribute("fill", "white");
+    svg.appendChild(background);
+
+    // Clone the chart SVG and append it to the new SVG
+    const chartSvg = document.querySelector(`#chart-${visualization._id} svg`);
+    if (chartSvg) {
+      const clonedChart = chartSvg.cloneNode(true) as SVGElement;
+      svg.appendChild(clonedChart);
+    }
+
+    // Convert text fill to black for better visibility on white background
+    svg.querySelectorAll("text").forEach((textElement) => {
+      textElement.style.fill = "black";
+    });
+
+    // Ensure axis lines are visible
+    svg.querySelectorAll(".tick line").forEach((line) => {
+      line.setAttribute("stroke", "rgba(0, 0, 0, 0.1)");
+    });
+
+    // Convert SVG to a string
+    const svgData = new XMLSerializer().serializeToString(svg);
+
+    // Create a Blob with the SVG data
+    const svgBlob = new Blob([svgData], {
+      type: "image/svg+xml;charset=utf-8",
+    });
+    const svgUrl = URL.createObjectURL(svgBlob);
+
+    // Create and trigger download
+    const downloadLink = document.createElement("a");
+    downloadLink.href = svgUrl;
+    downloadLink.download = `${visualization.fileName}.svg`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
+    // Clean up the object URL
+    URL.revokeObjectURL(svgUrl);
+  };
+
   return (
-    <div className="p-4">
+    <div className="p-4 bg-gray-900">
       <div className="mb-4 flex justify-between items-center">
         <h1 className="text-2xl font-bold">Dashboard</h1>
         {isEditing ? (
@@ -211,26 +262,39 @@ export default function Dashboard() {
               <h2 className="text-lg font-bold mb-2">
                 {visualization.fileName}
               </h2>
-              <Button
-                variant="outline"
-                size="icon"
-                className="absolute top-2 right-2 z-10 bg-gray-900"
-                onClick={() =>
-                  speakChartData(visualization._id, visualization.summary)
-                }
-              >
-                {speakingId === visualization._id ? (
-                  <Square className="h-4 w-4" />
-                ) : (
-                  <Volume2 className="h-4 w-4" />
-                )}
-                <span className="sr-only">
-                  {speakingId === visualization._id
-                    ? "Stop speaking"
-                    : "Speak chart data"}
-                </span>
-              </Button>
-              {renderVisualization(visualization)}
+              <div className="absolute top-2 right-2 z-10 flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="bg-gray-900"
+                  onClick={() =>
+                    speakChartData(visualization._id, visualization.summary)
+                  }
+                >
+                  {speakingId === visualization._id ? (
+                    <Square className="h-4 w-4" />
+                  ) : (
+                    <Volume2 className="h-4 w-4" />
+                  )}
+                  <span className="sr-only">
+                    {speakingId === visualization._id
+                      ? "Stop speaking"
+                      : "Speak chart data"}
+                  </span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="bg-gray-900"
+                  onClick={() => handleDownload(visualization)}
+                >
+                  <Download className="h-4 w-4" />
+                  <span className="sr-only">Download chart</span>
+                </Button>
+              </div>
+              <div id={`chart-${visualization._id}`}>
+                {renderVisualization(visualization)}
+              </div>
             </div>
           ))}
         </ResponsiveGridLayout>

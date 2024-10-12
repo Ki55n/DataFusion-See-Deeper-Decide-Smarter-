@@ -128,7 +128,7 @@ export default function Component({ params }: { params: { id: string } }) {
                 </div>
                 <span className="w-1/5 text-gray-400">{file.description}</span>
                 <span className="w-1/5 text-right text-gray-400">
-                  {file.size}
+                  {(parseInt(file.size) / 1000).toFixed(2)} KB
                 </span>
                 <span className="w-1/5 text-right text-gray-400">
                   {file.uploadDate.toLocaleDateString()}

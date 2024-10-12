@@ -2,15 +2,18 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface BarChartProps {
   data: { label: string; value: number }[];
-  // summary: string
+  title?: string;
 }
 
-export default function DownloadableBarChart({ data }: BarChartProps) {
+export default function BarChart({
+  data,
+  title = "Interactive Bar Chart",
+}: BarChartProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -18,8 +21,11 @@ export default function DownloadableBarChart({ data }: BarChartProps) {
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
-        const { width, height } = containerRef.current.getBoundingClientRect();
-        setDimensions({ width, height: height - 100 }); // Adjust height to account for download button and summary
+        const { width } = containerRef.current.getBoundingClientRect();
+        setDimensions({
+          width,
+          height: Math.min(400, Math.max(200, width * 0.5)),
+        });
       }
     };
 
@@ -35,7 +41,7 @@ export default function DownloadableBarChart({ data }: BarChartProps) {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const margin = { top: 40, right: 30, bottom: 50, left: 60 };
+    const margin = { top: 40, right: 20, bottom: 50, left: 60 };
     const chartWidth = dimensions.width - margin.left - margin.right;
     const chartHeight = dimensions.height - margin.top - margin.bottom;
 
@@ -49,6 +55,23 @@ export default function DownloadableBarChart({ data }: BarChartProps) {
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
+    // Create blue gradient
+    const gradient = svg
+      .append("defs")
+      .append("linearGradient")
+      .attr("id", "blue-gradient")
+      .attr("gradientUnits", "userSpaceOnUse")
+      .attr("x1", "0%")
+      .attr("y1", "0%")
+      .attr("x2", "0%")
+      .attr("y2", "100%");
+
+    gradient.append("stop").attr("offset", "0%").attr("stop-color", "#60A5FA"); // Light blue
+    gradient
+      .append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", "#1E40AF"); // Dark blue
+
     // Create bars
     chart
       .selectAll(".bar")
@@ -60,9 +83,23 @@ export default function DownloadableBarChart({ data }: BarChartProps) {
       .attr("y", (d) => y(d.value))
       .attr("width", x.bandwidth())
       .attr("height", (d) => chartHeight - y(d.value))
-      .attr("fill", "#60A5FA")
+      .attr("fill", "url(#blue-gradient)")
       .attr("rx", 4)
-      .attr("ry", 4);
+      .attr("ry", 4)
+      .on("mouseover", function (event, d) {
+        d3.select(this).attr("fill", "#3B82F6"); // Solid blue on hover
+        tooltip.style("opacity", 1).html(`${d.label}: ${d.value}`);
+      })
+      .on("mousemove", (event) => {
+        const [mouseX, mouseY] = d3.pointer(event, containerRef.current);
+        tooltip
+          .style("left", `${mouseX + 10}px`)
+          .style("top", `${mouseY - 10}px`);
+      })
+      .on("mouseout", function () {
+        d3.select(this).attr("fill", "url(#blue-gradient)");
+        tooltip.style("opacity", 0);
+      });
 
     // Add X Axis
     chart
@@ -72,7 +109,7 @@ export default function DownloadableBarChart({ data }: BarChartProps) {
       .selectAll("text")
       .attr("class", "axis-text")
       .style("text-anchor", "middle")
-      .style("fill", "rgba(255, 255, 255, 0.8)")
+      .style("fill", "rgba(255, 255, 255, 0.7)")
       .style("font-size", "12px");
 
     // Add Y Axis
@@ -81,7 +118,7 @@ export default function DownloadableBarChart({ data }: BarChartProps) {
       .call(d3.axisLeft(y).ticks(5).tickSize(-chartWidth))
       .selectAll("text")
       .attr("class", "axis-text")
-      .style("fill", "rgba(255, 255, 255, 0.8)")
+      .style("fill", "rgba(255, 255, 255, 0.7)")
       .style("font-size", "12px");
 
     // Style axis lines
@@ -95,83 +132,50 @@ export default function DownloadableBarChart({ data }: BarChartProps) {
       .attr("text-anchor", "middle")
       .attr("x", dimensions.width / 2)
       .attr("y", margin.top / 2)
-      .style("fill", "rgba(255, 255, 255, 0.9)")
+      .style("fill", "white")
       .style("font-size", "18px")
       .style("font-weight", "bold")
-      .text("Interactive Bar Chart");
-  }, [data, dimensions]);
+      .text(title);
 
-  const handleDownload = () => {
-    if (!svgRef.current) return;
-
-    // Clone the SVG node
-    const svgNode = svgRef.current.cloneNode(true) as SVGSVGElement;
-
-    // Create a white background
-    const background = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "rect"
-    );
-    background.setAttribute("width", "100%");
-    background.setAttribute("height", "100%");
-    background.setAttribute("fill", "white");
-
-    // Insert the background as the first child of the SVG
-    svgNode.insertBefore(background, svgNode.firstChild);
-
-    // Convert text fill to black for better visibility on white background
-    svgNode.querySelectorAll("text").forEach((textElement) => {
-      textElement.style.fill = "black";
-    });
-
-    // Ensure axis lines are visible
-    svgNode.querySelectorAll(".tick line").forEach((line) => {
-      line.setAttribute("stroke", "rgba(0, 0, 0, 0.1)");
-    });
-
-    // Convert SVG to a string
-    const svgData = new XMLSerializer().serializeToString(svgNode);
-
-    // Create a Blob with the SVG data
-    const svgBlob = new Blob([svgData], {
-      type: "image/svg+xml;charset=utf-8",
-    });
-    const svgUrl = URL.createObjectURL(svgBlob);
-
-    // Create and trigger download
-    const downloadLink = document.createElement("a");
-    downloadLink.href = svgUrl;
-    downloadLink.download = "bar_chart.svg";
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-
-    // Clean up the object URL
-    URL.revokeObjectURL(svgUrl);
-  };
+    // Add tooltip
+    const tooltip = d3
+      .select(containerRef.current)
+      .append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0)
+      .style("position", "absolute")
+      .style("background-color", "rgba(0, 0, 0, 0.8)")
+      .style("color", "white")
+      .style("padding", "8px")
+      .style("border-radius", "4px")
+      .style("font-size", "12px")
+      .style("pointer-events", "none")
+      .style("transition", "opacity 0.2s")
+      .style("z-index", "10");
+  }, [data, dimensions, title]);
 
   return (
-    <div className="flex flex-col items-center space-y-4">
+    <Card className="w-full p-4 bg-background border-0">
       <div
         ref={containerRef}
-        className="w-full relative"
-        style={{ height: "400px" }}
+        className="w-full h-full"
+        style={{ minHeight: "200px", maxHeight: "400px" }}
       >
         {dimensions.width === 0 || dimensions.height === 0 ? (
-          <div className="text-white">Loading chart...</div>
+          <div className="flex items-center justify-center h-full">
+            <Skeleton className="w-full h-full" />
+          </div>
         ) : (
           <svg
             ref={svgRef}
             width={dimensions.width}
             height={dimensions.height}
             className="w-full h-full"
+            viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+            preserveAspectRatio="xMidYMid meet"
           />
         )}
       </div>
-      <Button onClick={handleDownload} className="flex items-center space-x-2">
-        <Download className="w-4 h-4" />
-        <span>Download Chart</span>
-      </Button>
-    </div>
+    </Card>
   );
 }
