@@ -244,6 +244,10 @@ export default function ChatPanel({
     }
   };
 
+  const handleSuggestionClick = (suggestion: string) => {
+    setCurrentMessage(suggestion);
+  };
+
   return (
     <div className="w-full md:w-[40%] flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white min-h-screen">
       <div className="p-4 flex justify-between items-center bg-transparent">
@@ -308,7 +312,7 @@ export default function ChatPanel({
             {suggestions.map((item) => (
               <div
                 className="flex h-[35px] cursor-pointer items-center justify-center gap-[5px] rounded-lg text-white border border-gray-600 bg-gray-800 px-6 py-10 shadow-sm transition-colors hover:bg-gray-100 hover:text-black"
-                onClick={() => sendMessage(item.name)}
+                onClick={() => handleSuggestionClick(item.name)}
                 key={item.id}
               >
                 <Image
