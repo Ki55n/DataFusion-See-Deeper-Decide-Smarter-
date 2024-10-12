@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Save } from "lucide-react";
+import { Save, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import BarChart from "@/components/visualization/BarChart";
 import { saveVisualization, Visualization } from "@/db/visualizer";
 import Component from "../visualization/PieChart";
@@ -66,6 +67,7 @@ export default function ChatPanel({
   const [currentMessage, setCurrentMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [showNoFileAlert, setShowNoFileAlert] = useState(false);
 
   const { user }: any = UserAuth();
 
@@ -74,7 +76,14 @@ export default function ChatPanel({
   }, [chatMessages]);
 
   const sendMessage = async (message: string) => {
-    if (message.trim() && selectedFileIds.length > 0) {
+    if (selectedFileIds.length === 0) {
+      setShowNoFileAlert(true);
+      return;
+    }
+
+    setShowNoFileAlert(false);
+
+    if (message.trim()) {
       const newUserMessage: ChatMessage = {
         id: Date.now().toString(),
         sender: "user",
@@ -243,6 +252,14 @@ export default function ChatPanel({
         </h2>
       </div>
       <ScrollArea className="flex-grow p-4">
+        {showNoFileAlert && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Please select a file before sending a message.
+            </AlertDescription>
+          </Alert>
+        )}
         {chatMessages.map((message) => (
           <div
             key={message.id}
