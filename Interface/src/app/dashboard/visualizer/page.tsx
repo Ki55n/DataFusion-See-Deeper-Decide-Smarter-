@@ -163,11 +163,8 @@ export default function Dashboard() {
           const ziraVoice = voices.find((voice) =>
             voice.name.includes("English Female")
           );
-          if (ziraVoice) {
-            utterance.voice = ziraVoice;
-          } else if (voices.length > 0) {
-            utterance.voice = voices[0];
-          }
+          utterance.voice = ziraVoice || voices[0];
+
           utterance.onend = () => setSpeakingId(null);
           window.speechSynthesis.speak(utterance);
         };
