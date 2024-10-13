@@ -11,7 +11,7 @@
     ·
     <a href="./docs">Docs</a>
     ·
-    <a href="demo/link">Demo</a>
+    <a href="https://youtu.be/wVSKIyeLDfk">Demo</a>
   </p>
 </div>
 
@@ -31,7 +31,7 @@
 4. **Automated data insights** and **data cleaning pipelines**
 5. **Text-to-SQL** query options
 6. **Voice-activated** chart explanations
-7. Supports `csv`, `xls`, and `sqlite` file formats
+7. Supports `csv`, `xls`, `pdf`, and `sqlite` file formats
 
 ## 🚀 Get Started
 
