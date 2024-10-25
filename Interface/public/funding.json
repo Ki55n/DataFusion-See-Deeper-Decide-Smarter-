@@ -48,7 +48,7 @@
                 "type": "Saving Account",
                 "address": "Whitefield Main Road Bangalore",
                 "description": "Will accept direct bank transfers. Please e-mail me for details."
-            },
+            }
         ],
         "plans": [
             {
@@ -86,6 +86,6 @@
             {"year": 2024, "income": 0, "expenses": 1000, "taxes": 200, "currency": "USD", "description": "First time applying for grants."}
         ]
     }
-    
+
 }
 
