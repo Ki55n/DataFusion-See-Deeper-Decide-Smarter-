@@ -2,7 +2,7 @@
     "version": "v1.0.0",
     "entity": {
         "type": "group",
-        "role": "Team Lead",
+        "role": "owner",
         "name": "Kiran Shankar Chawan",
         "email": "kiranksc55@gmail.com",
         "phone": "+918660682508",
