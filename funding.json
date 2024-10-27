@@ -1,46 +1,48 @@
 {
-    "",
+    "version": "v1.0.0",
     "entity": {
         "type": "group",
         "role": "Team Lead",
         "name": "Kiran Shankar Chawan",
-        "email": "kiranksc55@gmail.com ",
+        "email": "kiranksc55@gmail.com",
         "phone": "+918660682508",
-        "description": "I'm a developer building DataFusion, an AI-powered open-source platform that democratizes data analysis and decision-making. Passionate about fostering innovation through FOSS, I aim to break down barriers to data access, creating tools that empower individuals and businesses alike to explore and harness the power of data freely.",
+        "description": "I'm a developer building DataFusion, an AI-powered open-source platform...",
         "webpageUrl": {
             "url": "https://data-fusion-see-deeper-decide-smarter-yuv8.vercel.app/login",
             "wellKnown": "https://github.com/Ki55n/DataFusion-See-Deeper-Decide-Smarter-/blob/main/funding.json"
         }
     },
-    "projects": [{
-        "guid": "DataFusion",
-        "name": "https://www.youtube.com/watch?v=wVSKIyeLDfk",
-        "description": "DataFusion (See Deeper, Decide Smarter) is AI-Powered Data Analysis System ( Based on Prompt like Chat GPT) AI Chat, Generative Interactive Charts, Data Insights, PsychographicAnalysis, AIAnalyst, Speak and Explain Charts, and more. The inspiration for DataFusion is both ambitious and revolutionary. The goal was to design an app that not only improves the business experience, but also democratizes data access, making it a useful tool for everyone. We envisioned a platform that seamlessly merges cutting-edgeAI with Google GenAI tools VertexAI, Big Query, Gemini, providing businesses withAI-driven insights, more accessibility, and greater consumer interaction.",
-        "webpageUrl": {
-            "url": "https://data-fusion-see-deeper-decide-smarter-yuv8.vercel.app/login "
+    "projects": [
+        {
+            "guid": "DataFusion",
+            "name": "https://www.youtube.com/watch?v=wVSKIyeLDfk",
+            "description": "DataFusion is AI-powered data analysis system...",
+            "webpageUrl": {
+                "url": "https://data-fusion-see-deeper-decide-smarter-yuv8.vercel.app/login"
+            },
+            "repositoryUrl": {
+                "url": "https://github.com/Ki55n/DataFusion-See-Deeper-Decide-Smarter-",
+                "wellKnown": "https://github.com/Ki55n/DataFusion-See-Deeper-Decide-Smarter-/blob/main/funding.json"
+            },
+            "licenses": ["spdx:AGPL-3.0"],
+            "tags": ["database", "columnar-database", "high-performance", "key-value-store"]
         },
-        "repositoryUrl": {
-            "url": "https://github.com/Ki55n/DataFusion-See-Deeper-Decide-Smarter-",
-            "wellKnown": "https://github.com/Ki55n/DataFusion-See-Deeper-Decide-Smarter-/blob/main/funding.json"
-        },
-        "licenses": ["spdx:AGPL-3.0"],
-        "tags": ["database", "columnar-database", "high-performance", "key-value-store"]
-    },
-    {
-        "guid": "vb-gooey",
-        "name": "VB Gooey IP tracer (demo)",
-        "description": "Using quantum-entangled packet sniffers, this cutting-edge Visual Basic GUI IP Tracer employs hyper-threaded blockchain algorithms to decrypt the target's digital DNA signature. The system's neural network of overclocked RAM crystals generates a real-time holographic map of cyberspace, pinpointing the perp's location with nanosecond precision.\n\nIn addition, its turbo-encabulated flux capacitor and multi-dimensional firewall penetrator, allows any hyper-dimensional air-gapped network to be broken into with ease.\n\n\n\nPS: This is a dummy demo listing.",
-        "webpageUrl": {
-            "url": "https://vb-gooey-ip-tracer.net",
-            "wellKnown": "https://vb-gooey-ip-tracer.net/.well-known/funding-manifest-urls"
-        },
-        "repositoryUrl": {
-            "url": "https://github.com/example/vb-gooey-ip-tracer",
-            "wellKnown": "https://github.com/example/vb-gooey-ip-tracer/blob/main/.well-known/funding-manifest-urls"
-        },
-        "licenses": ["spdx:MIT"],
-        "tags": ["high-performance", "security", "gui", "networking"]
-    }],
+        {
+            "guid": "vb-gooey",
+            "name": "VB Gooey IP tracer (demo)",
+            "description": "This is a dummy demo listing.",
+            "webpageUrl": {
+                "url": "https://vb-gooey-ip-tracer.net",
+                "wellKnown": "https://vb-gooey-ip-tracer.net/.well-known/funding-manifest-urls"
+            },
+            "repositoryUrl": {
+                "url": "https://github.com/example/vb-gooey-ip-tracer",
+                "wellKnown": "https://github.com/example/vb-gooey-ip-tracer/blob/main/.well-known/funding-manifest-urls"
+            },
+            "licenses": ["spdx:MIT"],
+            "tags": ["high-performance", "security", "gui", "networking"]
+        }
+    ],
     "funding": {
         "channels": [
             {
@@ -79,13 +81,18 @@
                 "amount": 0,
                 "currency": "USD",
                 "frequency": "one-time",
-                "channels": ["IDFC Bank", "IDFC Bank"]
+                "channels": ["IDFC Bank"]
             }
         ],
         "history": [
-            {"year": 2024, "income": 0, "expenses": 1000, "taxes": 200, "currency": "USD", "description": "First time applying for grants."}
+            {
+                "year": 2024,
+                "income": 0,
+                "expenses": 1000,
+                "taxes": 200,
+                "currency": "USD",
+                "description": "First time applying for grants."
+            }
         ]
     }
-
 }
-
