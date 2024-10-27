@@ -9,7 +9,7 @@
         "description": "I'm a developer building DataFusion, an AI-powered open-source platform...",
         "webpageUrl": {
             "url": "https://data-fusion-see-deeper-decide-smarter-yuv8.vercel.app/login",
-            "wellKnown": "https://github.com/Ki55n/DataFusion-See-Deeper-Decide-Smarter-/blob/main/funding.json"
+            "wellKnown": ""
         }
     },
     "projects": [
@@ -22,7 +22,7 @@
             },
             "repositoryUrl": {
                 "url": "https://github.com/Ki55n/DataFusion-See-Deeper-Decide-Smarter-",
-                "wellKnown": "https://github.com/Ki55n/DataFusion-See-Deeper-Decide-Smarter-/blob/main/funding.json"
+                "wellKnown": ""
             },
             "licenses": ["spdx:AGPL-3.0"],
             "tags": ["database", "columnar-database", "high-performance", "key-value-store"]
