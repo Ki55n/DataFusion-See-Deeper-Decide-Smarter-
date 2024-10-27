@@ -9,7 +9,7 @@
         "description": "I'm a developer building DataFusion, an AI-powered open-source platform that democratizes data analysis and decision-making. Passionate about fostering innovation through FOSS, I aim to break down barriers to data access, creating tools that empower individuals and businesses alike to explore and harness the power of data freely.",
         "webpageUrl": {
             "url": "https://data-fusion-see-deeper-decide-smarter-yuv8.vercel.app/login",
-            "wellKnown": ""
+            "wellKnown": "https://github.com/Ki55n/DataFusion-See-Deeper-Decide-Smarter-/blob/main/funding.json"
         }
     },
     "projects": [{
@@ -21,7 +21,7 @@
         },
         "repositoryUrl": {
             "url": "https://github.com/Ki55n/DataFusion-See-Deeper-Decide-Smarter-",
-            "wellKnown": "https://github.com/example/zombo-app/blob/main/.well-known/funding-manifest-urls"
+            "wellKnown": "https://github.com/Ki55n/DataFusion-See-Deeper-Decide-Smarter-/blob/main/funding.json"
         },
         "licenses": ["spdx:AGPL-3.0"],
         "tags": ["database", "columnar-database", "high-performance", "key-value-store"]
