@@ -26,21 +26,6 @@
             },
             "licenses": ["spdx:AGPL-3.0"],
             "tags": ["database", "columnar-database", "high-performance", "key-value-store"]
-        },
-        {
-            "guid": "vb-gooey",
-            "name": "VB Gooey IP tracer (demo)",
-            "description": "This is a dummy demo listing.",
-            "webpageUrl": {
-                "url": "https://vb-gooey-ip-tracer.net",
-                "wellKnown": "https://vb-gooey-ip-tracer.net/.well-known/funding-manifest-urls"
-            },
-            "repositoryUrl": {
-                "url": "https://github.com/example/vb-gooey-ip-tracer",
-                "wellKnown": "https://github.com/example/vb-gooey-ip-tracer/blob/main/.well-known/funding-manifest-urls"
-            },
-            "licenses": ["spdx:MIT"],
-            "tags": ["high-performance", "security", "gui", "networking"]
         }
     ],
     "funding": {
