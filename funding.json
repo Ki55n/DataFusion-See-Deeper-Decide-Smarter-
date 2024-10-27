@@ -1,7 +1,8 @@
 {
     "version": "v1.0.0",
+    "group of developers of DataFusion"
     "entity": {
-        "type": "Group",
+        "type": "group",
         "role": "Team Lead",
         "name": "Kiran Shankar Chawan",
         "email": "kiranksc55@gmail.com ",
