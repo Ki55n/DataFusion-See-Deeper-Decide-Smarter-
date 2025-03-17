@@ -1,5 +1,4 @@
 import requests
-import os
 from typing import List, Any
 from urllib.parse import urlencode
 

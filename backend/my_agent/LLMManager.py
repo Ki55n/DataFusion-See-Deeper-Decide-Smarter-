@@ -1,10 +1,9 @@
 from langchain_core.prompts import ChatPromptTemplate
-# from langchain_openai import ChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 class LLMManager:
-    def __init__(self, api_key):
-        model_name = "gemini-1.5-pro"#"gemini-1.5-pro-002" #gemini-1.0-pro #"gemini-1.5-flash"
+    def __init__(self, api_key, model_name="gemini-2.0-flash-exp"):
+        # model_name = "gemini-1.5-pro"#"gemini-1.5-pro-002" #gemini-1.0-pro #"gemini-1.5-flash"
         temperature = 0.0
         verbose = True
 

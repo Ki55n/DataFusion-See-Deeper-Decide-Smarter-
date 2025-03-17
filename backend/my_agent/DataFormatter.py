@@ -5,8 +5,8 @@ from backend.my_agent.graph_instructions import graph_instructions
 
 
 class DataFormatter:
-    def __init__(self, API_KEY:str):
-        self.llm_manager = LLMManager(api_key=API_KEY)
+    def __init__(self, API_KEY:str, MODEL_NAME:str):
+        self.llm_manager = LLMManager(api_key=API_KEY, model_name=MODEL_NAME)
 
     
     def format_data_for_visualization(self, state: dict) -> dict:

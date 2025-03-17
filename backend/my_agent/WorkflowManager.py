@@ -6,9 +6,9 @@ from langgraph.graph import END
 from typing import List
 
 class WorkflowManager:
-    def __init__(self, api_key: str, endpoint_url:str):
-        self.sql_agent = SQLAgent(API_KEY=api_key, ENDPOINT_URL=endpoint_url)
-        self.data_formatter = DataFormatter(API_KEY=api_key)
+    def __init__(self, api_key: str, endpoint_url:str, model_name:str="gemini-1.5-pro"):
+        self.sql_agent = SQLAgent(API_KEY=api_key, ENDPOINT_URL=endpoint_url, LLM_MODEL_NAME=model_name)
+        self.data_formatter = DataFormatter(API_KEY=api_key, MODEL_NAME=model_name)
 
     def create_workflow(self) -> StateGraph:
         """Create and configure the workflow graph."""

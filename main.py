@@ -48,30 +48,21 @@ app.add_middleware(
 )
 
 # load credentials
-load_dotenv()
+load_dotenv(dotenv_path=".env", override=True)
 API_KEY = os.getenv("GOOGLE_API_KEY")
+LLM_MODEL_NAME = os.getenv("GEMINI_LLM_MODEL")
 ENDPOINT_URL = os.getenv("DB_ENDPOINT_URL")
-SPEECH2TEXT_CREDS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 CLEANED_TABLE_NAME = "data_cleaned"
 ANALYSED_TABLE_NAME = "data_analysed"
 # define csv_agent_graph
 csv_agent_graph = WorkflowManager(
-    api_key=API_KEY, endpoint_url=ENDPOINT_URL
+    api_key=API_KEY,
+    endpoint_url=ENDPOINT_URL,
+    model_name=LLM_MODEL_NAME,
 ).returnGraph()
 
 # define summarizer llm agent
-summarizer_llm = LLMManager(api_key=API_KEY)
-
-# def table_exists(conn, table_name):
-#     cursor = conn.cursor()
-#     cursor.execute(
-#         """
-#         SELECT name FROM sqlite_master 
-#         WHERE type='table' AND name=?;
-#     """,
-#         (table_name,),
-#     )
-#     return cursor.fetchone() is None
+summarizer_llm = LLMManager(api_key=API_KEY, model_name=LLM_MODEL_NAME)
 
 def table_exists(conn, table_name_prefix):
     cursor = conn.cursor()
@@ -154,12 +145,7 @@ async def data_cleaning_pipeline(file_uuid: str):
                                 conn, 
                                 if_exists="replace", 
                                 index=False)
-            # else:
-            #     pipeline = AdvancedDataPipeline(df[0])
-            #     cleaned_df = pipeline.run_all()[0]
-            #     cleaned_df.to_sql(
-            #         CLEANED_TABLE_NAME, conn, if_exists="replace", index=False
-            #     )
+
             return {"message": "Finished data cleaning."}
         except Exception as e:
             logger.exception("Error saving data to SQLite.")
@@ -235,7 +221,6 @@ async def handle_data_analysis(file_uuid: str):
 @app.get("/")
 async def root():
     return {"message": "This is an ai-server."}
-
 
 
 if __name__ == "__main__":
