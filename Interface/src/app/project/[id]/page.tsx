@@ -3,39 +3,41 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FileIcon, Trash2Icon, UploadIcon, XIcon } from "lucide-react";
+import { FileIcon, Trash2Icon, UploadIcon, DownloadIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { UserAuth } from "@/app/context/AuthContext";
-import { getFilesByUserIdProjectId, uploadFileToDb } from "@/db/files";
 import { FileUploadPopup } from "@/components/shared/FileUploadPopup";
+import { getFilesByProjectId, deleteFile } from "@/services/fileService";
+import { FileDTO } from "@/types";
 
 interface FileItem {
+  id: string;
   file_uuid: string;
   name: string;
   description: string;
   size: string;
   uploadDate: Date;
+  file_path?: string;
 }
 
-async function getProjectFiles(
-  projectId: string,
-  userId: string
-): Promise<FileItem[]> {
+async function getProjectFiles(projectId: string): Promise<FileItem[]> {
   try {
-    if (!userId || !projectId) {
-      throw new Error("Invalid userId or projectId");
+    if (!projectId) {
+      throw new Error("Invalid projectId");
     }
-    console.log("Fetching files for project:", projectId, "and user:", userId);
+    console.log("Fetching files for project:", projectId);
 
-    const files = await getFilesByUserIdProjectId(userId, projectId);
+    const files = await getFilesByProjectId(projectId);
     console.log("Files fetched successfully:", files);
 
-    return files.map((file) => ({
+    return files.map((file: FileDTO) => ({
+      id: file.id,
       file_uuid: file.file_uuid,
       name: file.name,
-      description: file.description,
-      size: file.size,
+      description: file.description || "",
+      size: file.size.toString(),
       uploadDate: file.dateUploaded,
+      file_path: file.file_path || undefined
     }));
   } catch (error) {
     console.error("Error fetching project files:", error);
@@ -43,9 +45,9 @@ async function getProjectFiles(
   }
 }
 
-export default function Component({ params }: { params: { id: string } }) {
+export default function Page({ params }: { params: { id: string } }) {
   const searchParams = useSearchParams();
-  const { user, loading: authLoading }: any = UserAuth(); // Use 'loading' from auth context
+  const { user, loading: authLoading }: any = UserAuth();
   const router = useRouter();
 
   const [projectName, setProjectName] = useState<string>("");
@@ -66,14 +68,9 @@ export default function Component({ params }: { params: { id: string } }) {
           return;
         }
 
-        console.log(
-          "Fetching project details for user:",
-          user.uid,
-          "and project:",
-          params.id
-        );
+        console.log("Fetching project details for project:", params.id);
 
-        const projectFiles = await getProjectFiles(params.id, user.uid);
+        const projectFiles = await getProjectFiles(params.id);
         setFiles(projectFiles);
       } catch (error) {
         console.error("Error fetching project details:", error);
@@ -84,8 +81,16 @@ export default function Component({ params }: { params: { id: string } }) {
   }, [params.id, user]);
 
   const removeFile = async (id: string) => {
-    // Implement file removal logic here
-    setFiles(files.filter((file) => file.file_uuid !== id));
+    try {
+      const success = await deleteFile(id);
+      if (success) {
+        setFiles(files.filter((file) => file.id !== id));
+      } else {
+        console.error("Failed to delete file");
+      }
+    } catch (error) {
+      console.error("Error deleting file:", error);
+    }
   };
 
   const addNewFile = (newFile: FileItem) => {
@@ -131,13 +136,29 @@ export default function Component({ params }: { params: { id: string } }) {
                   {(parseInt(file.size) / 1000).toFixed(2)} KB
                 </span>
                 <span className="w-1/5 text-right text-gray-400">
-                  {file.uploadDate.toLocaleDateString()}
+                  {new Date(file.uploadDate).toLocaleDateString()}
                 </span>
-                <div className="w-1/5 text-right">
+                <div className="w-1/5 text-right flex items-center justify-end space-x-2">
+                  {file.file_path && (
+                    <a 
+                      href={file.file_path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-blue-400 hover:text-blue-300 hover:bg-blue-400/20"
+                      >
+                        <DownloadIcon className="h-5 w-5" />
+                        <span className="sr-only">Download file</span>
+                      </Button>
+                    </a>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeFile(file.file_uuid)}
+                    onClick={() => removeFile(file.id)}
                     className="text-red-400 hover:text-red-300 hover:bg-red-400/20"
                   >
                     <Trash2Icon className="h-5 w-5" />

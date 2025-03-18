@@ -1,21 +1,24 @@
 "use client";
 
-import { uploadFileToDb } from "@/db/files";
+import { uploadFile } from "@/services/fileService";
 import { XIcon } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
+import supabase from "@/lib/supabase";
 import { changeProjectStatus } from "@/db/project";
 
 interface FileItem {
+  id: string;
   file_uuid: string;
   name: string;
   description: string;
   size: string;
   uploadDate: Date;
+  file_path?: string;
 }
 
-async function uploadFile(
+async function uploadAndSaveFile(
   file: File,
   name: string,
   description: string,
@@ -23,11 +26,9 @@ async function uploadFile(
   userId: string
 ) {
   try {
+    // Upload file to SQLite server
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("name", name);
-    formData.append("description", description);
-    formData.append("projectId", projectId);
 
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_SQLITE_URL}/upload-file`,
@@ -36,29 +37,61 @@ async function uploadFile(
         body: formData,
       }
     );
+    
     if (!response.ok) {
       throw new Error("File upload failed");
     }
-    const file_uuid = await response.json();
-    console.log(file_uuid);
+    
+    const data = await response.json();
+    console.log("File upload response:", data);
 
-    const filedata = {
-      name: name,
-      size: file.size,
-      dateUploaded: new Date(),
-      file_uuid: file_uuid.file_uuid,
-    };
-
+    // Set project status to inactive during processing
     await changeProjectStatus(projectId, "inactive");
 
-    await uploadFileToDb(userId, projectId, description, filedata);
+    // Upload file to Supabase Storage
+    const fileExtension = file.name.split('.').pop();
+    const filePath = `${projectId}/${data.file_uuid}.${fileExtension}`;
+    
+    const { error: uploadError, data: uploadData } = await supabase.storage
+      .from('files')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+    
+    if (uploadError) {
+      throw new Error(`Supabase storage upload failed: ${uploadError.message}`);
+    }
+    
+    // Get the public URL
+    const { data: publicUrlData } = supabase.storage
+      .from('files')
+      .getPublicUrl(filePath);
+    
+    const downloadURL = publicUrlData.publicUrl;
+    console.log("File uploaded to Supabase Storage:", downloadURL);
+
+    // Save file metadata to Postgres using Prisma
+    const fileData = await uploadFile(
+      userId,
+      projectId,
+      description,
+      {
+        name: name,
+        size: file.size,
+        file_uuid: data.file_uuid,
+        file_path: downloadURL // Store Supabase Storage URL
+      }
+    );
 
     return {
-      file_uuid: filedata.file_uuid,
+      id: fileData?.id || "",
+      file_uuid: data.file_uuid,
       name: name,
-      size: filedata.size.toString(),
-      uploadDate: filedata.dateUploaded,
-      description: description,
+      description: description || "",
+      size: file.size.toString(),
+      uploadDate: new Date(),
+      file_path: downloadURL
     };
   } catch (error) {
     console.error("Error occurred during file upload:", error);
@@ -148,7 +181,7 @@ export function FileUploadPopup({
 
     setIsLoading(true);
     try {
-      const uploadedFile = await uploadFile(
+      const uploadedFile = await uploadAndSaveFile(
         file,
         name,
         description,
