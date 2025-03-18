@@ -5,7 +5,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Save, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import BarChart from "@/components/visualization/BarChart";
-import { saveVisualization, Visualization } from "@/db/visualizer";
+import { saveVisualization } from "@/db/visualizer";
+import { CreateVisualizationDTO } from "@/types";
 import Component from "../visualization/PieChart";
 import { UserAuth } from "@/app/context/AuthContext";
 import LineGraphTest from "../visualization/LineGraphtest";
@@ -179,7 +180,7 @@ export default function ChatPanel({
           return;
       }
 
-      const visualizationData: Omit<Visualization, "_id"> = {
+      const visualizationData: CreateVisualizationDTO = {
         userId: user.uid,
         fileId: selectedFileIds[0],
         fileName: message.user_query || "Data Visualization",

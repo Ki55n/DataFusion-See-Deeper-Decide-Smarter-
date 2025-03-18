@@ -1,117 +1,66 @@
-"use server";
+"use client";
 
-import { MongoClient, ServerApiVersion, ObjectId } from "mongodb";
+import { 
+  createVisualization as createVisualizationService,
+  getVisualizationsByUserId,
+  getVisualizationById,
+  updateVisualizationLayout,
+  deleteVisualization
+} from "@/services/visualizationService";
+import { CreateVisualizationDTO, VisualizationDTO } from "@/types";
 
-const uri = process.env.NEXT_PUBLIC_MONGO_URL || "";
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
+// Export the Visualization type
+export type Visualization = VisualizationDTO;
 
-export interface Visualization {
-  _id: string;
-  userId: string;
-  visualizationType: string;
-  fileId: string;
-  fileName: string;
-  data: any;
-  description: string;
-  layout: {
-    i: string;
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-  };
-  summary: string;
-}
-
-export async function getVisualizations(
-  userId: string
-): Promise<Visualization[]> {
+// Function to save a visualization
+export const saveVisualization = async (visualization: CreateVisualizationDTO): Promise<boolean> => {
   try {
-    await client.connect();
-    const database = client.db("datafusion");
-    const visualizations = database.collection("visualizations");
-    const result = await visualizations.find({ userId }).toArray();
-
-    // Serialize the ObjectId to string and ensure all properties of Visualization are included
-    return result.map((doc) => ({
-      _id: doc._id.toString(),
-      userId: doc.userId,
-      visualizationType: doc.visualizationType,
-      fileId: doc.fileId,
-      fileName: doc.fileName,
-      data: doc.data,
-      description: doc.description,
-      layout: doc.layout,
-      summary: doc.summary,
-    }));
-  } catch (err) {
-    console.error("Error fetching visualizations:", err);
-    return [];
-  } finally {
-    await client.close();
-  }
-}
-
-interface LayoutUpdate {
-  _id: string;
-  layout: {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-  };
-}
-
-export async function updateVisualizationLayout(
-  updates: LayoutUpdate[]
-): Promise<boolean> {
-  try {
-    console.log("yoyo");
-    await client.connect();
-    const database = client.db("datafusion");
-    const visualizations = database.collection("visualizations");
-
-    const updateOperations = updates.map((update) => ({
-      updateOne: {
-        filter: { _id: new ObjectId(update._id) },
-        update: { $set: { layout: update.layout } },
-      },
-    }));
-
-    const result = await visualizations.bulkWrite(updateOperations);
-    return result.modifiedCount === updates.length;
-  } catch (err) {
-    console.error("Error updating visualization layouts:", err);
+    const result = await createVisualizationService(visualization);
+    return !!result;
+  } catch (error) {
+    console.error("Error saving visualization:", error);
     return false;
-  } finally {
-    await client.close();
   }
-}
+};
 
-export async function saveVisualization(
-  visualization: Omit<Visualization, "_id">
-): Promise<string | null> {
+// Function to get visualizations by user ID
+export const getVisualizations = async (userId: string): Promise<VisualizationDTO[]> => {
   try {
-    await client.connect();
-    const database = client.db("datafusion");
-    const visualizations = database.collection<Visualization>("visualizations");
-
-    const result = await visualizations.insertOne({
-      ...visualization,
-      _id: new ObjectId().toString(),
-    });
-
-    return result.insertedId.toString();
-  } catch (err) {
-    console.error("Error saving visualization:", err);
-    return null;
-  } finally {
-    await client.close();
+    return await getVisualizationsByUserId(userId);
+  } catch (error) {
+    console.error("Error getting visualizations:", error);
+    return [];
   }
-}
+};
+
+// Function to get a visualization by ID
+export const getVisualization = async (id: string): Promise<VisualizationDTO | null> => {
+  try {
+    return await getVisualizationById(id);
+  } catch (error) {
+    console.error("Error getting visualization:", error);
+    return null;
+  }
+};
+
+// Function to update visualization layouts
+export const updateLayouts = async (
+  updates: { id: string; layout: any }[]
+): Promise<boolean> => {
+  try {
+    return await updateVisualizationLayout(updates);
+  } catch (error) {
+    console.error("Error updating visualization layouts:", error);
+    return false;
+  }
+};
+
+// Function to delete a visualization
+export const deleteVisualizationById = async (id: string): Promise<boolean> => {
+  try {
+    return await deleteVisualization(id);
+  } catch (error) {
+    console.error("Error deleting visualization:", error);
+    return false;
+  }
+}; 

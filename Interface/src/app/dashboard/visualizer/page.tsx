@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   getVisualizations,
-  updateVisualizationLayout,
+  updateLayouts,
   Visualization,
 } from "@/db/visualizer";
 import { Volume2, Square, Download } from "lucide-react";
@@ -12,6 +12,7 @@ import { UserAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import dynamic from "next/dynamic";
+import { LoadingScreen, LoadingCard } from "@/components/ui/loading";
 
 // Dynamically import CSS for react-grid-layout
 import "react-grid-layout/css/styles.css";
@@ -60,6 +61,7 @@ export default function Dashboard() {
   const [isResizable, setIsResizable] = useState(false);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { user, loading: authLoading }: any = UserAuth();
 
@@ -78,17 +80,24 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchVisualizations = async () => {
       if (userId) {
-        const fetchedVisualizations = await getVisualizations(userId);
-        setVisualizations(fetchedVisualizations);
+        setIsLoading(true);
+        try {
+          const fetchedVisualizations = await getVisualizations(userId);
+          setVisualizations(fetchedVisualizations);
 
-        const newLayouts: Layout[] = fetchedVisualizations.map((viz) => ({
-          i: viz._id,
-          x: viz.layout.x,
-          y: viz.layout.y,
-          w: viz.layout.w,
-          h: viz.layout.h,
-        }));
-        setLayouts({ lg: newLayouts });
+          const newLayouts: Layout[] = fetchedVisualizations.map((viz) => ({
+            i: viz.id,
+            x: viz.layout.x,
+            y: viz.layout.y,
+            w: viz.layout.w,
+            h: viz.layout.h,
+          }));
+          setLayouts({ lg: newLayouts });
+        } catch (error) {
+          console.error("Error fetching visualizations:", error);
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -125,7 +134,7 @@ export default function Dashboard() {
     setIsResizable(false);
 
     const updates = layouts.lg.map((layout) => ({
-      _id: layout.i,
+      id: layout.i,
       layout: {
         x: layout.x,
         y: layout.y,
@@ -134,7 +143,7 @@ export default function Dashboard() {
       },
     }));
 
-    const success = await updateVisualizationLayout(updates);
+    const success = await updateLayouts(updates);
     if (success) {
       console.log("Layout updated successfully");
     } else {
@@ -196,7 +205,7 @@ export default function Dashboard() {
     svg.appendChild(background);
 
     // Clone the chart SVG and append it to the new SVG
-    const chartSvg = document.querySelector(`#chart-${visualization._id} svg`);
+    const chartSvg = document.querySelector(`#chart-${visualization.id} svg`);
     if (chartSvg) {
       const clonedChart = chartSvg.cloneNode(true) as SVGElement;
       svg.appendChild(clonedChart);
@@ -233,17 +242,42 @@ export default function Dashboard() {
     URL.revokeObjectURL(svgUrl);
   };
 
+  if (!isClient) return null;
+  if (isLoading) return <LoadingScreen />;
+
   return (
-    <div className="p-4 bg-gray-900">
-      <div className="mb-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        {isEditing ? (
-          <Button onClick={handleSaveLayout}>Save Layout</Button>
-        ) : (
-          <Button onClick={handleEditLayout}>Edit Layout</Button>
-        )}
-      </div>
-      {isClient && (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+      <div className="max-w-[2000px] mx-auto p-6">
+        <div className="mb-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
+                AI Data Analysis Dashboard
+              </h1>
+              <p className="text-gray-400 mt-2">
+                Visualizing insights through advanced analytics
+              </p>
+            </div>
+            <div className="flex gap-4">
+              {isEditing ? (
+                <Button 
+                  onClick={handleSaveLayout}
+                  className="bg-gradient-to-r from-green-500 to-emerald-700 hover:from-green-600 hover:to-emerald-800 transition-all duration-200"
+                >
+                  Save Layout
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleEditLayout}
+                  className="bg-gradient-to-r from-blue-500 to-purple-700 hover:from-blue-600 hover:to-purple-800 transition-all duration-200"
+                >
+                  Edit Layout
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+
         <ResponsiveGridLayout
           className="layout"
           layouts={layouts}
@@ -252,52 +286,51 @@ export default function Dashboard() {
           onLayoutChange={handleLayoutChange}
           isDraggable={isDraggable}
           isResizable={isResizable}
+          margin={[20, 20]}
         >
           {visualizations.map((visualization) => (
             <div
-              key={visualization._id}
-              className="bg-gray-800 p-4 rounded shadow"
+              key={visualization.id}
+              className="group transition-all duration-200 bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-2xl hover:shadow-blue-500/10 border border-gray-700/50"
             >
-              <h2 className="text-lg font-bold mb-2">
-                {visualization.fileName}
-              </h2>
-              <div className="absolute top-2 right-2 z-10 flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="bg-gray-900"
-                  onClick={() =>
-                    speakChartData(visualization._id, visualization.summary)
-                  }
-                >
-                  {speakingId === visualization._id ? (
-                    <Square className="h-4 w-4" />
-                  ) : (
-                    <Volume2 className="h-4 w-4" />
-                  )}
-                  <span className="sr-only">
-                    {speakingId === visualization._id
-                      ? "Stop speaking"
-                      : "Speak chart data"}
-                  </span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="bg-gray-900"
-                  onClick={() => handleDownload(visualization)}
-                >
-                  <Download className="h-4 w-4" />
-                  <span className="sr-only">Download chart</span>
-                </Button>
-              </div>
-              <div id={`chart-${visualization._id}`}>
-                {renderVisualization(visualization)}
+              <div className="p-4">
+                <div className="flex justify-between items-start mb-4">
+                  <h2 className="text-lg font-bold text-gray-100 group-hover:text-blue-400 transition-colors">
+                    {visualization.fileName}
+                  </h2>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-gray-700/50 transition-colors"
+                      onClick={() =>
+                        speakChartData(visualization.id, visualization.summary || "")
+                      }
+                    >
+                      {speakingId === visualization.id ? (
+                        <Square className="h-4 w-4 text-red-400" />
+                      ) : (
+                        <Volume2 className="h-4 w-4 text-gray-400 group-hover:text-blue-400" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-gray-700/50 transition-colors"
+                      onClick={() => handleDownload(visualization)}
+                    >
+                      <Download className="h-4 w-4 text-gray-400 group-hover:text-blue-400" />
+                    </Button>
+                  </div>
+                </div>
+                <div id={`chart-${visualization.id}`} className="transition-all duration-200">
+                  {renderVisualization(visualization)}
+                </div>
               </div>
             </div>
           ))}
         </ResponsiveGridLayout>
-      )}
+      </div>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { UserAuth } from "@/app/context/AuthContext";
 import { getProjectsByUserId } from "@/db/project";
 import Dashboard from "@/components/active-projects/Dashboard";
 import { useRouter } from "next/navigation";
+import { LoadingScreen } from "@/components/ui/loading";
 // Assuming you have a Project type defined
 
 type Project = {
@@ -21,7 +22,7 @@ type Project = {
 export default function DashboardPage() {
   const { user, loading: authLoading }: any = UserAuth(); // Use 'loading' from auth context
   const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
 
@@ -40,7 +41,7 @@ export default function DashboardPage() {
         } catch (error) {
           console.error("Error fetching projects:", error);
         } finally {
-          setLoading(false);
+          setIsLoading(false);
         }
       }
     }
@@ -48,8 +49,8 @@ export default function DashboardPage() {
     fetchProjects();
   }, [user]);
 
-  if (loading) {
-    return <div>Loading...</div>;
+  if (authLoading || isLoading) {
+    return <LoadingScreen />;
   }
 
   return <Dashboard initialProjects={projects} />;

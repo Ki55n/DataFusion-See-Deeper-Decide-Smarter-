@@ -9,6 +9,14 @@ import { useRouter } from "next/navigation";
 import { UserAuth } from "../context/AuthContext";
 import Image from "next/image";
 
+// Define the user type to match what's in AuthContext
+interface AuthUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  emailVerified: boolean;
+}
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,35 +27,59 @@ export default function Login() {
   const router = useRouter();
   const [loginError, setLoginError] = useState("");
   const [loadingVerification, setLoadingVerification] = useState(false);
-  const { user, loading: authLoading, googleSignIn }: any = UserAuth(); // Use 'loading' from auth context
+  const { user, loading: authLoading, googleSignIn } = UserAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
 
+  // Redirect to dashboard if user is already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      router.push("/dashboard/projects"); // Redirect to the login page if not authenticated
+      console.log("User is authenticated, redirecting to dashboard");
+      const authUser = user as AuthUser;
+      if (authUser.emailVerified || authUser.email) {
+        router.push("/dashboard/projects");
+      }
     }
   }, [user, authLoading, router]);
 
   const handleSignIn = async () => {
+    if (!email || !password) {
+      setLoginError("Please enter both email and password");
+      return;
+    }
+
     try {
+      console.log("Attempting to sign in with email:", email);
       const result = await signInWithEmailAndPassword(email, password);
 
-      if (result?.user?.emailVerified) {
-        router.push("/dashboard/projects");
+      if (result?.user) {
+        console.log("Sign in successful, checking email verification");
+        if (result.user.emailVerified) {
+          console.log("Email verified, redirecting to dashboard");
+          router.push("/dashboard/projects");
+        } else {
+          console.log("Email not verified");
+          setLoginError("Email not verified. Please check your inbox.");
+          await auth.signOut(); // Force sign out if not verified
+        }
       } else {
-        setLoginError("Email not verified. Please check your inbox.");
-        await auth.signOut(); // Force sign out if not verified
+        setLoginError("Invalid email or password. Please try again.");
       }
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      console.error("Login error:", e.message || "Unknown error");
       setLoginError("Invalid email or password. Please try again.");
     }
   };
 
   const handleSignInWithGoogle = async () => {
     try {
+      setGoogleLoading(true);
+      console.log("Attempting Google sign in");
       await googleSignIn();
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Google sign-in error:", error.message || "Unknown error");
       setLoginError("Google sign-in failed. Please try again.");
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -60,14 +92,15 @@ export default function Login() {
     try {
       await sendPasswordResetEmail(email);
       setLoginError("Password reset email sent! Check your inbox.");
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.error("Password reset error:", error.message || "Unknown error");
       setLoginError("Failed to send password reset email. Please try again.");
     }
   };
 
   useEffect(() => {
     if (error) {
+      console.error("Firebase auth error:", error.message);
       setLoginError("Login failed. Please check your credentials.");
     }
   }, [error]);
@@ -124,15 +157,22 @@ export default function Login() {
         <button
           onClick={handleSignInWithGoogle}
           className="flex items-center justify-center w-full p-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition shadow-md"
+          disabled={googleLoading}
         >
-          <Image
-            alt="Google"
-            src={"/google-logo.svg"}
-            height={20}
-            width={20}
-            className="mr-3"
-          />
-          Sign in with Google
+          {googleLoading ? (
+            "Signing in..."
+          ) : (
+            <>
+              <Image
+                alt="Google"
+                src={"/google-logo.svg"}
+                height={20}
+                width={20}
+                className="mr-3"
+              />
+              Sign in with Google
+            </>
+          )}
         </button>
 
         <div className="flex justify-between items-center mt-6">

@@ -5,8 +5,8 @@ import Providers from "@/app/providers";
 import { AuthContextProvider } from "../context/AuthContext";
 
 export const metadata: Metadata = {
-  title: "Data fusion",
-  description: "Data fusion",
+  title: "Data Tukey",
+  description: "See Deeper Decide Smarter",
 };
 
 export default function RootLayout({
