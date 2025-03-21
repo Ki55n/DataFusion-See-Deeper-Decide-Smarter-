@@ -11,8 +11,8 @@ import { LoadingScreen, LoadingSpinner } from "@/components/ui/loading";
 interface FileItem {
   file_uuid: string;
   name: string;
-  description: string;
-  size: string;
+  description: string | null | undefined;
+  size: number;
   dateUploaded: Date;
 }
 

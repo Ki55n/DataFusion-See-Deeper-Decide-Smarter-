@@ -13,8 +13,8 @@ import {
 interface FileItem {
   file_uuid: string;
   name: string;
-  description: string;
-  size: string;
+  description: string | null | undefined;
+  size: number;
   dateUploaded: Date;
 }
 
@@ -95,7 +95,7 @@ export function FileList({
                 <span className="font-medium">{file.name}</span>
               </div>
               <span className="w-1/5 text-right text-gray-400">
-                {(parseInt(file.size) / 1000).toFixed(2)} KB
+                {(parseInt(file.size.toString()) / 1000).toFixed(2)} KB
               </span>
               <span className="w-1/5 text-right text-gray-400">
                 {file.dateUploaded.toString()}

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Save, AlertCircle } from "lucide-react";
+import { Save, AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import BarChart from "@/components/visualization/BarChart";
 import { saveVisualization } from "@/db/visualizer";
@@ -24,9 +24,17 @@ interface ChatMessage {
   user_query?: string;
 }
 
+interface FileItem {
+  file_uuid: string;
+  name: string;
+  description: string | null | undefined;
+  size: number;
+  dateUploaded: Date;
+}
+
 interface ChatPanelProps {
   selectedFileIds: string[];
-  files: any[];
+  files: FileItem[];
   project_uuid: string;
 }
 
@@ -250,15 +258,15 @@ export default function ChatPanel({
   };
 
   return (
-    <div className="w-full md:w-[40%] flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white min-h-screen">
-      <div className="p-4 flex justify-between items-center bg-transparent">
-        <h2 className="text-3xl font-bold" style={{ color: "#0ff" }}>
+    <div className="w-full md:w-[40%] flex flex-col bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 text-white min-h-screen">
+      <div className="p-4 flex justify-between items-center bg-transparent border-b border-purple-500/30">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
           AI Chat
         </h2>
       </div>
       <ScrollArea className="flex-grow p-4">
         {showNoFileAlert && (
-          <Alert variant="destructive" className="mb-4">
+          <Alert variant="destructive" className="mb-4 bg-red-900/50 border-red-500">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Please select a file before sending a message.
@@ -268,32 +276,32 @@ export default function ChatPanel({
         {chatMessages.map((message) => (
           <div
             key={message.id}
-            className={`mb-4 ${
+            className={`mb-6 ${
               message.sender === "user" ? "text-right" : "text-left"
             }`}
           >
             <div
-              className={`inline-block px-4 py-2 rounded-lg ${
+              className={`inline-block px-4 py-3 rounded-2xl ${
                 message.sender === "user"
-                  ? "bg-gray-800 text-cyan-400"
-                  : "bg-gray-800 text-pink-400"
-              }`}
+                  ? "bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-cyan-300"
+                  : "bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-pink-300"
+              } backdrop-blur-sm`}
               style={{
-                border: "1px solid currentColor",
-                boxShadow: "0 0 10px currentColor",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                boxShadow: "0 0 20px rgba(0, 255, 255, 0.1)",
                 wordWrap: "break-word",
                 whiteSpace: "pre-wrap",
-                maxWidth: "80%",
+                maxWidth: "85%",
               }}
             >
               {message.content}
             </div>
-            {message.visualization && (
-              <div className="mt-2">
+            {message.visualization && message.visualization !== "none" && (
+              <div className="mt-4 p-4 rounded-xl bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm border border-purple-500/20">
                 {renderVisualization(message)}
                 <Button
                   onClick={() => handleSaveVisualization(message)}
-                  className="mt-2 bg-green-600 hover:bg-green-700"
+                  className="mt-4 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-green-500/20 transition-all duration-300"
                 >
                   <Save className="mr-2 h-4 w-4" />
                   Save to Visualizer
@@ -306,13 +314,15 @@ export default function ChatPanel({
 
       {showSuggestions && (
         <div>
-          <div className="flex justify-center items-center p-2 mb-24 font-bold">
-            <span className=" text-6xl">Chat With Data</span>
+          <div className="flex justify-center items-center p-2 mb-24">
+            <span className="text-6xl font-bold bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+              Chat With Data
+            </span>
           </div>
           <div className="flex flex-wrap mx-auto items-center text-gray-100 font-bold px-4 justify-center gap-6 mb-4">
             {suggestions.map((item) => (
               <div
-                className="flex h-[35px] cursor-pointer items-center justify-center gap-[5px] rounded-lg text-white border border-gray-600 bg-gray-800 px-6 py-10 shadow-sm transition-colors hover:bg-gray-100 hover:text-black"
+                className="flex h-[35px] cursor-pointer items-center justify-center gap-[5px] rounded-xl text-white border border-purple-500/30 bg-gradient-to-r from-purple-900/50 to-blue-900/50 px-6 py-10 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-purple-500/20 hover:bg-gradient-to-r hover:from-purple-800/50 hover:to-blue-800/50"
                 onClick={() => handleSuggestionClick(item.name)}
                 key={item.id}
               >
@@ -334,7 +344,7 @@ export default function ChatPanel({
         </div>
       )}
 
-      <div className="p-4 bg-transparent">
+      <div className="p-4 bg-transparent border-t border-purple-500/30">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -347,21 +357,25 @@ export default function ChatPanel({
             placeholder="Type your message..."
             value={currentMessage}
             onChange={(e) => setCurrentMessage(e.target.value)}
-            className="flex-grow bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-0"
+            className="flex-grow bg-gray-800/50 border border-purple-500/30 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 rounded-xl backdrop-blur-sm"
             style={{
-              boxShadow: "0 0 5px cyan",
-              borderColor: "#0ff",
-              color: "#fff",
+              boxShadow: "0 0 10px rgba(147, 51, 234, 0.1)",
             }}
             disabled={isLoading}
           />
           <Button
             type="submit"
-            className="bg-cyan-500 hover:bg-cyan-400 text-white"
-            style={{ boxShadow: "0 0 10px #0ff" }}
+            className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl shadow-lg hover:shadow-purple-500/20 transition-all duration-300"
             disabled={isLoading}
           >
-            {isLoading ? "Sending..." : "Send"}
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Send"
+            )}
           </Button>
         </form>
       </div>
