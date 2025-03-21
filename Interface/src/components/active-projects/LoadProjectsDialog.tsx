@@ -39,6 +39,10 @@ export default function LoadProjectsDialog({
   onLoadProjects,
 }: LoadProjectsDialogProps) {
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
+  
+  console.log("All Projects in Dialog:", projects);
+  const inactiveProjects = projects.filter(project => project.status === "inactive");
+  console.log("Inactive Projects:", inactiveProjects);
 
   const handleProjectSelection = (projectId: string) => {
     setSelectedProjects((prev) =>
@@ -73,9 +77,8 @@ export default function LoadProjectsDialog({
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="mt-4 h-[300px] pr-4">
-          {projects
-            .filter((project) => project.status === "inactive")
-            .map((project) => (
+          {inactiveProjects.length > 0 ? (
+            inactiveProjects.map((project) => (
               <div
                 key={project._id}
                 className="flex items-center space-x-2 mb-4"
@@ -101,7 +104,10 @@ export default function LoadProjectsDialog({
                   </span>
                 </label>
               </div>
-            ))}
+            ))
+          ) : (
+            <p className="text-gray-400 text-center">No inactive projects found to load.</p>
+          )}
         </ScrollArea>
         <div className="mt-4 flex justify-end">
           <Button

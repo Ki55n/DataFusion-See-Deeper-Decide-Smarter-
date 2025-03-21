@@ -21,6 +21,7 @@ export interface ProjectDTO {
   createdAt: Date;
   updatedAt: Date;
   userId: string;
+  files?: FileDTO[];
 }
 
 export interface CreateProjectDTO {

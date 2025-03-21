@@ -1,14 +1,22 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { CreateProjectDTO, ProjectDTO, UpdateProjectDTO } from "@/types";
+import { CreateProjectDTO, ProjectDTO, UpdateProjectDTO, FileDTO } from "@/types";
+import { mapToProjectFormat } from "@/utils/projectUtils";
 
 export async function getProjectsByUserId(userId: string): Promise<ProjectDTO[]> {
   try {
     const projects = await prisma.project.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
+      include: {
+        files: true,
+      },
     });
+    
+    console.log("Projects fetched for user:", userId, projects.length);
+    projects.forEach(p => console.log(`Project ${p.id}: ${p.name}, status: ${p.status}`));
+    
     return projects;
   } catch (error) {
     console.error("Error fetching projects:", error);
@@ -85,11 +93,7 @@ export async function getProjectDetails(userId: string, projectId: string) {
     });
     
     if (project) {
-      return {
-        _id: project.id,
-        name: project.name,
-        files: project.files,
-      };
+      return mapToProjectFormat(project);
     }
     return null;
   } catch (error) {

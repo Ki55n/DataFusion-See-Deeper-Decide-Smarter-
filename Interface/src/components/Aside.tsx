@@ -48,7 +48,13 @@ export default function Aside() {
       <div className="space-y-8">
         <div className="w-full flex justify-center items-center">
           <div className="hover:opacity-90 transition-opacity">
-            <Image src="/logo.png" width={120} height={70} alt="logo" className="drop-shadow-lg" />
+            <Image
+              src="/icon.png"
+              width={120}
+              height={70}
+              alt="logo"
+              className="drop-shadow-lg"
+            />
           </div>
         </div>
         <div className="pb-2">
@@ -65,10 +71,18 @@ export default function Aside() {
                     : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
                 }`}
               >
-                <span className={`text-xl ${currentRoute === route.route ? 'drop-shadow-lg' : ''}`}>
+                <span
+                  className={`text-xl ${
+                    currentRoute === route.route ? "drop-shadow-lg" : ""
+                  }`}
+                >
                   {route.icon}
                 </span>
-                <span className={`text-[15px] font-medium ${currentRoute === route.route ? 'font-semibold' : ''}`}>
+                <span
+                  className={`text-[15px] font-medium ${
+                    currentRoute === route.route ? "font-semibold" : ""
+                  }`}
+                >
                   {route.name}
                 </span>
               </div>
@@ -89,7 +103,9 @@ export default function Aside() {
             </div>
             <div className="flex flex-col items-center gap-3 w-full p-4 rounded-xl bg-gray-800/50">
               <FaUserCircle className="text-gray-200 text-4xl" />
-              <p className="text-gray-200 font-medium text-sm">{user?.displayName}</p>
+              <p className="text-gray-200 font-medium text-sm">
+                {user?.displayName}
+              </p>
               <button
                 className="w-full py-2 px-4 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors text-sm font-medium"
                 onClick={handleSignOut}
@@ -99,8 +115,8 @@ export default function Aside() {
             </div>
           </div>
         ) : (
-          <Link 
-            href="/login" 
+          <Link
+            href="/login"
             className="w-full py-2 px-4 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-center font-medium shadow-lg shadow-indigo-500/30"
           >
             Login
