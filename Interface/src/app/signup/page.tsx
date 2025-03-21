@@ -82,12 +82,15 @@ export default function Signup() {
       if (userCredential) {
         // Firebase user ID
         const userId = userCredential.user.uid;
+        const userEmail = userCredential.user.email;
+        const userName = userCredential.user.displayName || userEmail?.split('@')[0] || 'User';
 
         try {
           // Create a new user in database
           const newUser = await createUser({
-            name: "john doe",
-            email: email,
+            id: userId,
+            name: userName,
+            email: userEmail || '',
           });
           
           console.log("User created in database:", newUser ? "success" : "failed");
@@ -124,9 +127,9 @@ export default function Signup() {
   const handleSignIn = async () => {
     try {
       setGoogleLoading(true);
-      // Don't redirect here - let the AuthContext handle it
       await googleSignIn();
-      // Remove the premature redirect
+      // The user creation will be handled by the AuthContext's useEffect
+      // which calls syncUserWithDatabase
     } catch (error: any) {
       console.log("Google sign-in error:", error.message || "Unknown error");
       setAlertmsg("Error signing in with Google. Please try again.");

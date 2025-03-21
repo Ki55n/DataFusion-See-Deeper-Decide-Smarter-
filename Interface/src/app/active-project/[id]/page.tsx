@@ -9,6 +9,7 @@ import ChatInterface from "@/components/active-project-detail/ChatPanel";
 import { LoadingScreen, LoadingSpinner } from "@/components/ui/loading";
 
 interface FileItem {
+  id: string;
   file_uuid: string;
   name: string;
   description: string | null | undefined;
@@ -42,7 +43,15 @@ export default function Component({ params }: ComponentProps) {
           const userId = user.uid;
           const projectId = params?.id || "";
           const fetchedFiles = await getFilesByUserIdProjectId(userId, projectId);
-          setFiles(fetchedFiles);
+          const mappedFiles = fetchedFiles.map(file => ({
+            id: file.id,
+            file_uuid: file.file_uuid,
+            name: file.name,
+            description: file.description,
+            size: file.size,
+            dateUploaded: file.dateUploaded
+          }));
+          setFiles(mappedFiles);
         } catch (error) {
           console.error("Error fetching files:", error);
         } finally {
