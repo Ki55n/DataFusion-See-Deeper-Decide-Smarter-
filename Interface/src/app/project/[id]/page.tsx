@@ -37,7 +37,7 @@ async function getProjectFiles(projectId: string): Promise<FileItem[]> {
       description: file.description || "",
       size: file.size.toString(),
       uploadDate: file.dateUploaded,
-      file_path: file.file_path || undefined
+      file_path: file.file_path || undefined,
     }));
   } catch (error) {
     console.error("Error fetching project files:", error);
@@ -70,8 +70,17 @@ export default function Page({ params }: { params: { id: string } }) {
 
         console.log("Fetching project details for project:", params.id);
 
-        const projectFiles = await getProjectFiles(params.id);
-        setFiles(projectFiles);
+        const projectFiles = await getFilesByProjectId(params.id);
+        const mappedFiles = projectFiles.map((file: FileDTO) => ({
+          id: file.id,
+          file_uuid: file.file_uuid,
+          name: file.name,
+          description: file.description || "",
+          size: file.size.toString(),
+          uploadDate: file.dateUploaded,
+          file_path: file.file_path || undefined,
+        }));
+        setFiles(mappedFiles);
       } catch (error) {
         console.error("Error fetching project details:", error);
       }
@@ -140,7 +149,7 @@ export default function Page({ params }: { params: { id: string } }) {
                 </span>
                 <div className="w-1/5 text-right flex items-center justify-end space-x-2">
                   {file.file_path && (
-                    <a 
+                    <a
                       href={file.file_path}
                       target="_blank"
                       rel="noopener noreferrer"
