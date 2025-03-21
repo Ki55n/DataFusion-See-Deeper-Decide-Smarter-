@@ -42,69 +42,66 @@ export default function Dashboard({ initialProjects }: DashboardProps) {
 
   const handleLoadProjects = async (newProjects: Project[]) => {
     try {
-      console.log(newProjects);
       console.log("Loading new projects...");
-      console.log(newProjects[0].files);
 
       for (const newProject of newProjects) {
         console.log(`Processing project: ${newProject._id}`);
-        console.log(newProject);
 
         let allFilesProcessedSuccessfully = true;
 
         // Process files within each project
         for (const file of newProject.files) {
-          console.log(
-            `Running data cleaning pipeline on file: ${file.file_uuid}`
-          );
+          console.log(`Running data cleaning pipeline on file: ${file.file_uuid}`);
           const cleaningRes = await dataCleaningPipeline(file.file_uuid);
 
           if (cleaningRes?.status === 200) {
-            console.log(`Running data analysis pipeline on file: ${file}`);
+            console.log(`Running data analysis pipeline on file: ${file.file_uuid}`);
             const analysisRes = await dataAnalysisPipeline(file.file_uuid);
 
             if (analysisRes?.status !== 200) {
               allFilesProcessedSuccessfully = false;
-              console.log(
-                `Data analysis pipeline failed for file: ${file} with response: ${analysisRes}`
-              );
+              console.log(`Data analysis pipeline failed for file: ${file.file_uuid}`);
             }
           } else {
             allFilesProcessedSuccessfully = false;
-            console.log(
-              `Data cleaning pipeline failed for file: ${file} with response: ${cleaningRes}`
-            );
+            console.log(`Data cleaning pipeline failed for file: ${file.file_uuid}`);
           }
         }
 
         // Change project status to active only if all files were processed successfully
         if (allFilesProcessedSuccessfully) {
           await changeProjectStatus(newProject._id, "active");
+          newProject.status = "active"; // Update the local project status
         }
       }
 
       // Update state with new projects
       setProjects((prevProjects) => {
-        console.log("Updating projects state...");
         const updatedProjects = [...prevProjects];
-
+        
         newProjects.forEach((newProject) => {
           const existingProjectIndex = updatedProjects.findIndex(
             (project) => project._id === newProject._id
           );
 
           if (existingProjectIndex !== -1) {
-            console.log(`Updating existing project: ${newProject._id}`);
-            updatedProjects[existingProjectIndex] = newProject;
+            // Update existing project
+            updatedProjects[existingProjectIndex] = {
+              ...updatedProjects[existingProjectIndex],
+              ...newProject,
+              status: newProject.status || updatedProjects[existingProjectIndex].status
+            };
           } else {
-            console.log(`Adding new project: ${newProject._id}`);
+            // Add new project
             updatedProjects.push(newProject);
           }
         });
 
-        console.log("Projects state updated.");
         return updatedProjects;
       });
+
+      // Close the dialog after successful loading
+      setIsDialogOpen(false);
     } catch (error) {
       console.error("Error in handleLoadProjects: ", error);
     }
