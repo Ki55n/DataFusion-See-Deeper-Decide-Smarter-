@@ -34,6 +34,7 @@ export async function syncUserWithDatabase(firebaseUser: SimplifiedFirebaseUser)
       console.log(`User not found in database, creating new user for: ${firebaseUser.email}`);
       user = await prisma.user.create({
         data: {
+          id: firebaseUser.uid, // Use Firebase UID as the database ID
           name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
           email: firebaseUser.email,
         },
