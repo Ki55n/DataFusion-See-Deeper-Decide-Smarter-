@@ -7,6 +7,7 @@ import { UserAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import ChatInterface from "@/components/active-project-detail/ChatPanel";
 import { LoadingScreen, LoadingSpinner } from "@/components/ui/loading";
+import { getProjectDetails } from "@/services/projectService";
 
 interface FileItem {
   id: string;
@@ -21,11 +22,12 @@ interface ComponentProps {
   params?: { id?: string };
 }
 
-export default function Component({ params }: ComponentProps) {
+export default function ActiveProjectDetailPage({ params }: ComponentProps) {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [projectName, setProjectName] = useState<string>("");
   const { user, loading: authLoading }: any = UserAuth();
   const router = useRouter();
 
@@ -34,6 +36,24 @@ export default function Component({ params }: ComponentProps) {
       router.push("/login");
     }
   }, [user, authLoading, router]);
+
+  useEffect(() => {
+    const fetchProjectDetails = async () => {
+      if (user && params?.id) {
+        try {
+          const projectDetails = await getProjectDetails(user.uid, params.id);
+          if (projectDetails) {
+            setProjectName(projectDetails.name);
+          }
+        } catch (error) {
+          console.error("Error fetching project details:", error);
+          setProjectName("Unknown Project");
+        }
+      }
+    };
+
+    fetchProjectDetails();
+  }, [params?.id, user]);
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -137,7 +157,7 @@ export default function Component({ params }: ComponentProps) {
         <header className="px-8 py-6 bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50">
           <div className="max-w-7xl mx-auto">
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-              Project: {params?.id || "Unknown"}
+              Project: {projectName || "Loading..."}
             </h1>
             <p className="text-gray-400 mt-2">
               Analyze and process your data with AI-powered tools
