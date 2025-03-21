@@ -24,10 +24,27 @@ export default function CustomerLocationGlobe() {
   const globeMaterial = useMemo(() => {
     const material = new THREE.MeshPhongMaterial({ color: "white" });
     material.bumpScale = 10;
-    new THREE.TextureLoader().load(
-      "//unpkg.com/three-globe/example/img/earth-topology.png",
+    
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.crossOrigin = 'anonymous';
+    
+    // Use a more reliable CDN for the earth texture
+    const earthTextureUrl = "https://raw.githubusercontent.com/vasturiano/three-globe/master/example/img/earth-topology.png";
+    
+    textureLoader.load(
+      earthTextureUrl,
       (texture) => {
         material.bumpMap = texture;
+        material.needsUpdate = true;
+        console.log('Earth texture loaded successfully');
+      },
+      (progress) => {
+        console.log('Loading texture:', (progress.loaded / progress.total * 100) + '%');
+      },
+      (error) => {
+        console.error("Error loading earth topology texture:", error);
+        // Fallback to a basic material if texture loading fails
+        material.bumpScale = 0;
         material.needsUpdate = true;
       }
     );
@@ -74,8 +91,13 @@ export default function CustomerLocationGlobe() {
   useEffect(() => {
     if (globeRef.current) {
       const globe = globeRef.current;
-      globe.controls().autoRotate = true;
-      globe.controls().autoRotateSpeed = 0.5;
+      try {
+        globe.controls().autoRotate = true;
+        globe.controls().autoRotateSpeed = 0.5;
+        console.log('Globe initialized successfully');
+      } catch (error) {
+        console.error('Error initializing globe:', error);
+      }
     }
   }, []);
 
@@ -89,14 +111,13 @@ export default function CustomerLocationGlobe() {
   );
 
   return (
-    <div className="  flex items-center justify-center">
-      <div className="">
+    <div className="relative w-full h-full min-h-[400px] flex items-center justify-center">
+      <div className="relative w-full h-full flex items-center justify-center">
         <div className="absolute inset-0 rounded-full bg-white opacity-10 blur-3xl"></div>
         <Globe
           ref={globeRef}
-          globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
-          bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
-          // customGlobeImageUrl={customGlobeImage}
+          globeImageUrl="https://raw.githubusercontent.com/vasturiano/three-globe/master/example/img/earth-night.jpg"
+          bumpImageUrl="https://raw.githubusercontent.com/vasturiano/three-globe/master/example/img/earth-topology.png"
           pointsData={data}
           pointLat="lat"
           pointLng="lng"
@@ -123,15 +144,8 @@ export default function CustomerLocationGlobe() {
           globeMaterial={globeMaterial}
           showAtmosphere={true}
           showGraticules={false}
+          onGlobeReady={() => console.log("Globe is ready")}
         />
-      </div>
-      <div className="absolute bottom-4 left-4 text-white text-sm space-y-2">
-        {data.map((location, index) => (
-          <div key={index} className="flex items-center">
-            <span className="w-3 h-3 bg-pink-500 rounded-full mr-2"></span>
-            {location.city}
-          </div>
-        ))}
       </div>
     </div>
   );

@@ -339,7 +339,7 @@ export default function Dashboard() {
                     </Button>
                   </div>
                 </div>
-                <div id={`chart-${visualization.id}`} className="transition-all duration-200">
+                <div id={`chart-${visualization.id}`} className="transition-all duration-200 h-[400px] w-full bg-gray-900 rounded-lg">
                   {renderVisualization(visualization)}
                 </div>
               </div>
