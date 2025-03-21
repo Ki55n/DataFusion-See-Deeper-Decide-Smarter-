@@ -55,7 +55,21 @@ type Layouts = {
 
 export default function Dashboard() {
   const [layouts, setLayouts] = useState<Layouts>({ lg: [] });
-  const [visualizations, setVisualizations] = useState<Visualization[]>([]);
+  const [visualizations, setVisualizations] = useState<Visualization[]>([
+    {
+      id: "dummy-globe",
+      visualizationType: "globe",
+      description: "Global Customer Distribution",
+      summary: "This visualization shows the distribution of customers across different locations worldwide.",
+      data: {},
+      layout: { x: 0, y: 0, w: 6, h: 4 },
+      fileId: "dummy-file",
+      fileName: "Global Distribution",
+      userId: "dummy-user",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+  ]);
   const [isEditing, setIsEditing] = useState(false);
   const [isDraggable, setIsDraggable] = useState(false);
   const [isResizable, setIsResizable] = useState(false);
@@ -83,9 +97,11 @@ export default function Dashboard() {
         setIsLoading(true);
         try {
           const fetchedVisualizations = await getVisualizations(userId);
-          setVisualizations(fetchedVisualizations);
+          // Preserve the dummy globe visualization and add it to the fetched visualizations
+          const dummyGlobe = visualizations[0];
+          setVisualizations([dummyGlobe, ...fetchedVisualizations]);
 
-          const newLayouts: Layout[] = fetchedVisualizations.map((viz) => ({
+          const newLayouts: Layout[] = [dummyGlobe, ...fetchedVisualizations].map((viz) => ({
             i: viz.id,
             x: viz.layout.x,
             y: viz.layout.y,
