@@ -33,8 +33,15 @@ export default function Home() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-3"
             >
+              <Image
+                src="/icon.png"
+                alt="Datatukey Logo"
+                width={40}
+                height={40}
+                className="rounded-lg"
+              />
               <div className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 text-transparent bg-clip-text">
                 Datatukey
               </div>
@@ -53,14 +60,24 @@ export default function Home() {
 
       <main>
         {/* Hero Section */}
-        <section className="pt-32 pb-20 px-4">
-          <div className="max-w-7xl mx-auto">
+        <section className="pt-32 pb-20 px-4 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 to-purple-500/10 pointer-events-none"></div>
+          <div className="max-w-7xl mx-auto relative">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               className="text-center"
             >
+              <div className="mb-8">
+                <Image
+                  src="/icon.png"
+                  alt="Datatukey Logo"
+                  width={80}
+                  height={80}
+                  className="mx-auto rounded-xl shadow-2xl shadow-blue-500/20"
+                />
+              </div>
               <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 text-transparent bg-clip-text">
                 See Deeper.<br />Decide Smarter.
               </h1>
@@ -84,8 +101,9 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section className="py-20 px-4 bg-slate-800/50">
-          <div className="max-w-7xl mx-auto">
+        <section className="py-20 px-4 bg-slate-800/50 relative">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500/5 via-transparent to-transparent pointer-events-none"></div>
+          <div className="max-w-7xl mx-auto relative">
             <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
@@ -124,12 +142,13 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 px-4">
+        <section className="py-20 px-4 relative">
+          <div className="absolute inset-0 bg-gradient-to-t from-purple-500/10 to-transparent pointer-events-none"></div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="max-w-4xl mx-auto text-center"
+            className="max-w-4xl mx-auto text-center relative"
           >
             <h2 className="text-4xl font-bold text-white mb-6">
               Ready to Transform Your Data Analysis?
