@@ -5,7 +5,7 @@ import Providers from "@/app/providers";
 import { AuthContextProvider } from "../context/AuthContext";
 
 export const metadata: Metadata = {
-  title: "Data Tukey",
+  title: "Datatukey",
   description: "See Deeper Decide Smarter",
 };
 

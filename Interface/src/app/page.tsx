@@ -36,7 +36,7 @@ export default function Home() {
               className="flex items-center space-x-2"
             >
               <div className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 text-transparent bg-clip-text">
-                Data Tukey
+                Datatukey
               </div>
             </motion.div>
             <div className="flex space-x-4">
@@ -135,7 +135,7 @@ export default function Home() {
               Ready to Transform Your Data Analysis?
             </h2>
             <p className="text-xl text-slate-300 mb-8">
-              Join thousands of data scientists and analysts who are already using Data Tukey
+              Join thousands of data scientists and analysts who are already using Datatukey
               to unlock the full potential of their data.
             </p>
             <motion.div
@@ -156,7 +156,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-slate-900 border-t border-slate-800 py-8">
         <div className="max-w-7xl mx-auto px-4 text-center text-slate-400">
-          <p>© 2024 Data Tukey. All rights reserved.</p>
+          <p>© 2024 Datatukey. All rights reserved.</p>
         </div>
       </footer>
     </div>
